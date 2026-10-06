@@ -126,7 +126,7 @@ const kv=(k,v)=>`<div class="askv"><span>${k}</span><b>${v}</b></div>`;
 const EX='<p class="asex">Example data</p>';
 const NOTIFS=[
   {ic:'heart',t:'@river liked your post',meta:'2h · Like'},
-  {ic:'message-circle',t:'@sage replied to your discussion',meta:'5h · Reply'},
+  {ic:'message-circle',t:'@sage commented on your post',meta:'5h · Comment'},
   {ic:'bookmark',t:'@juniper saved your resource',meta:'1d · Save'},
   {ic:'bell',t:'Welcome to Modern Hippie',meta:'3d · System'}
 ];
@@ -195,7 +195,6 @@ twrap.querySelectorAll('.tmini').forEach(b=>b.onclick=()=>openScreen(b.dataset.l
 const CREATE_META={
   sub:{title:'New subtopic',fields:'name'},
   feed:{title:'Write a post',fields:'post'},
-  dis:{title:'Start a discussion',fields:'dis'},
   res:{title:'Add a resource',fields:'res'}
 };
 function closeCreate(silent){
@@ -241,12 +240,9 @@ function createFormHTML(k){
     </div>`;
   }
   if(k==='feed')return `${EX}<div class="cform" id="cForm" data-k="feed">${secPick}
+    <label class="cfield"><span>Type</span><select id="cPostType"><option value="written">Written</option><option value="photo">Photo</option><option value="video">Video</option></select></label>
     <label class="cfield"><span>Post</span><textarea id="cBody" rows="5" placeholder="Share an update"></textarea></label>
     <button type="button" class="asbtn pri wide" id="cSubmit">Post</button></div>`;
-  if(k==='dis')return `${EX}<div class="cform" id="cForm" data-k="dis">${secPick}
-    <label class="cfield"><span>Title</span><input id="cName" placeholder="What do you want to discuss?" maxlength="120"></label>
-    <label class="cfield"><span>Opening message</span><textarea id="cBody" rows="4" placeholder="Add context"></textarea></label>
-    <button type="button" class="asbtn pri wide" id="cSubmit">Start discussion</button></div>`;
   return `${EX}<div class="cform" id="cForm" data-k="res">${secPick}
     <label class="cfield"><span>Title</span><input id="cName" placeholder="Resource title" maxlength="120"></label>
     <label class="cfield"><span>Type</span><select id="cType"><option value="link">Link</option><option value="file">File</option></select></label>
@@ -341,13 +337,10 @@ function wireCreateForm(k){
   $('cSubmit').onclick=e=>{e.stopPropagation();
     if(k==='feed'){
       const body=$('cBody').value.trim()||'Example post from you';
-      window.addPlaceholderItem&&addPlaceholderItem('feed',{t:body.slice(0,80)+(body.length>80?'…':''),text:body,meta:'Just now · 0 likes'});
+      const ptype=($('cPostType')&&$('cPostType').value)||'written';
+      const label=ptype==='video'?'Example video post':(ptype==='photo'?'Example photo post':'Example written post');
+      window.addPlaceholderItem&&addPlaceholderItem('feed',{t:label+': '+body.slice(0,60)+(body.length>60?'…':''),text:body,meta:'Just now · 0 likes · 0 comments',type:ptype,video:ptype==='video'});
       closeCreate();window.toast&&toast('Post added');return;
-    }
-    if(k==='dis'){
-      const t=$('cName').value.trim()||'New discussion';
-      window.addPlaceholderItem&&addPlaceholderItem('dis',{t,text:$('cBody').value.trim()||undefined,meta:'0 replies · Just now'});
-      closeCreate();window.toast&&toast('Discussion started');return;
     }
     const t=$('cName').value.trim()||'New resource';
     const kind=$('cType').value;

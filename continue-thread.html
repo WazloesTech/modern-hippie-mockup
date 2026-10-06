@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="feed-detail.html" aria-label="Back"><i data-ic="arrow-left"></i></a><h1>Continue thread</h1></div>
+  <p class="asnote" id="context">Branch of a comment thread</p>
+  <div class="cthread" id="thread"></div>
+</main>
+<div class="dcomposer">
+  <span class="creplyhint" id="hint" hidden></span>
+  <div class="dcomposerrow">
+    <input id="reply" placeholder="Write a reply" aria-label="Reply">
+    <button type="button" id="send">Reply</button>
+  </div>
+</div>
+<script src="icons3.js"></script><script src="comments3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'Example post';
+const cid=P.get('cid')||'c1a1a1a';
+const from=P.get('from')||('feed-detail.html?t='+encodeURIComponent(T));
+$('back').href=from;document.title='Continue thread';
+const node=MHComments.find(cid);
+$('context').textContent=node?('From '+node.w+' · '+T):('Thread · '+T);
+const here=location.pathname.split('/').pop()+location.search;
+function draw(){
+  MHComments.renderBranch(cid,$('thread'),{postT:T,fromUrl:here});
+}
+paintIcons();
+draw();
+const composer=document.querySelector('.dcomposer');
+composer._rerender=draw;
+MHComments.wire($('thread'),composer,{defaultParent:cid});
+</script></body></html>

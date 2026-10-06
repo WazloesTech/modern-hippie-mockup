@@ -1,0 +1,24 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="home7.html#people" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Person</h1></div>
+  <div class="pprof">
+    <div class="dav big"><i data-ic="user"></i></div>
+    <b id="handle">@river</b>
+    <p class="dbody" id="bio">Example bio — a short line about this member.</p>
+    <div class="chips" id="chips"><span>Mind</span><span>Guide</span></div>
+    <button type="button" class="asbtn pri" id="follow">Follow</button>
+  </div>
+</main>
+<script src="icons3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'@river';
+const from=P.get('from')||'home7.html#people';
+$('back').href=from;$('title').textContent=T;$('handle').textContent=T;document.title=T;
+paintIcons();
+$('follow').onclick=()=>{
+  const on=$('follow').classList.toggle('on');
+  $('follow').textContent=on?'Following':'Follow';
+};
+</script></body></html>
