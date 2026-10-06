@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="home7.html#dis" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Discussion</h1></div>
+  <div class="dop"><div class="dav"><i data-ic="user"></i></div><div><b id="opWho">@river</b><div class="dmeta" id="opMeta">Original post · 3h</div></div></div>
+  <p class="dbody" id="opBody">Example opening post for this discussion. Placeholder text so you can see how a thread reads — replies stack below, and you can like or save the thread.</p>
+  <div class="dacts"><button type="button" class="icbtn tog" id="like" aria-label="Like"><i data-ic="thumbs-up"></i></button><button type="button" class="icbtn tog" id="save" aria-label="Save"><i data-ic="bookmark"></i></button></div>
+  <p class="sect">Replies</p>
+  <div class="dreplies" id="reps"></div>
+</main>
+<div class="dcomposer"><input id="reply" placeholder="Write a reply" aria-label="Reply"><button type="button" id="send">Reply</button></div>
+<script src="icons3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'Example discussion: where do beginners start?';
+const from=P.get('from')||'home7.html#dis';
+$('back').href=from;$('title').textContent=T;document.title=T;
+const REPS=[{w:'@sage',t:'Placeholder reply — start with the basics and take it slow.',m:'2h'},{w:'@juniper',t:'Another example reply with a tip from experience.',m:'1h'},{w:'@ash',t:'Short agreeing reply.',m:'40m'}];
+function draw(){$('reps').innerHTML=REPS.map(r=>`<div class="drep"><b>${r.w}</b><div class="dmeta">${r.m}</div><p class="dbody" style="margin:6px 0 0">${r.t}</p></div>`).join('');paintIcons()}
+paintIcons();draw();
+document.querySelectorAll('.tog').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+$('send').onclick=()=>{const v=$('reply').value.trim();if(!v)return;REPS.push({w:'@you',t:v,m:'Just now'});$('reply').value='';draw()};
+</script></body></html>

@@ -1,0 +1,127 @@
+// Shared sections (Subtopics / Feed / Discussions / Resources): data, the four views, add rows, section switching.
+(function(){
+const names={sub:'Subtopics',feed:'Feed',dis:'Discussions',res:'Resources'};
+const adds={sub:'Add a subtopic',feed:'Write a post',dis:'Start a discussion',res:'Add a resource'};
+const VIEWS=['list','compact','post','full'];
+const main=document.querySelector('main');
+const LOREM=['Example summary placeholder. A quick sense of what is inside, written by the community, so you can decide without opening it.',
+ 'Placeholder text: a couple of short sentences about this item. Real wording will come from members and the best-voted version.',
+ 'Example text that stands in for the real description. It runs two or three lines so the card reads well at a glance.'];
+const subs=(window.SUB_ITEMS||[]).map((x,i)=>({t:x.t,chips:x.c,href:x.h,text:LOREM[i%3]}));
+const from=subs.map(s=>s.t);const src=i=>from.length?from[i%from.length]:'this topic';
+const mk=(k,rows)=>rows.map((x,i)=>({t:x[0],meta:x[1],tag:'from '+src(i+1),text:LOREM[(i+1)%3],chips:[x[1]],video:x[2]=='video',kind:x[3]||''}));
+const DATA={sub:subs,
+ feed:mk('feed',[['Example video post: a two-minute morning routine','1h · 46 likes','video'],['Example post: a short update with a photo','2h · 14 likes'],['Example post: what worked for me this week','5h · 31 likes'],['Example post: a question for the group','1d · 8 likes'],['Example post: a small win to share','2d · 22 likes']]),
+ dis:mk('dis',[['Example discussion: where do beginners start?','18 replies · 3h'],['Example discussion: favourite routine?','42 replies · 1d'],['Example discussion: common mistakes','9 replies · 2d'],['Example discussion: tools you swear by','27 replies · 4d']]),
+ res:mk('res',[['Example resource: a beginner guide','Article · 8 min read',,'link'],['Example resource: a recommended book','Book · 240 pages',,'file'],['Example resource: a short video course','Video · 45 min',,'link'],['Example resource: a printable checklist','PDF · 2 pages',,'file']])};
+const GLOBAL_TAKEN=['Modern Hippie','Body','Mind','Soul','Business','Family','Community','Focus and attention','Sleep','Learning new skills','Calm under stress','Habits','Running','Fitness'];
+const CTX_ID=(()=>{const q=new URLSearchParams(location.search).get('ctx');if(q&&['mh','follow','personal'].includes(q))return q;try{const s=sessionStorage.getItem('mh.context');if(s&&['mh','follow','personal'].includes(s))return s}catch(e){}return window.MH_CONTEXT||'mh'})();
+window.MH_CONTEXT=window.MH_CONTEXT||CTX_ID;
+const FOLKS=['@river','@sage','@juniper','@ash','@wren','@cedar'];
+function flavorChips(base,i){
+  if(CTX_ID==='follow')return ['From '+FOLKS[i%FOLKS.length],'Following'].concat((base||[]).slice(0,1));
+  if(CTX_ID==='personal')return [i%2?'Saved':'Created by you'].concat((base||[]).filter(c=>!/members/i.test(c)).slice(0,2));
+  return base||[];
+}
+function flavorTag(tag,i){
+  if(CTX_ID==='follow')return 'from '+FOLKS[i%FOLKS.length];
+  if(CTX_ID==='personal')return i%2?'saved by you':'created by you';
+  return tag;
+}
+function flavorMeta(meta,i){
+  if(CTX_ID==='follow')return (meta||'')+' · following';
+  if(CTX_ID==='personal')return (meta||'')+' · yours';
+  return meta;
+}
+DATA.sub=DATA.sub.map((x,i)=>({...x,chips:flavorChips(x.chips,i)}));
+['feed','dis','res'].forEach(k=>{DATA[k]=DATA[k].map((x,i)=>({...x,tag:flavorTag(x.tag,i),meta:flavorMeta(x.meta,i),chips:flavorChips(x.chips,i)}))});
+const key=k=>'mh.view.'+k;
+const viewOf=k=>{const v=localStorage.getItem(key(k));if(v==='full')return 'compact';return ['list','compact','post'].includes(v)?v:'compact'};
+let cur='sub',filterQ='';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const chips=a=>`<div class="chips">${(a||[]).map(c=>`<span>${esc(c)}</span>`).join('')}</div>`;
+const num=(k,i)=>k=='sub'?`<div class="num"><button onclick="openVote(this,event)">${i+1}</button></div>`:`<div class="num"><span class="nstat">${i+1}</span></div>`;
+const vtile=(cls='')=>`<div class="vtile ${cls}"><i data-ic="video"></i><span>Video coming soon</span></div>`;
+const tabs='<div class="tabs"><span class="on">Trending</span><span>For you</span><span>Top</span></div>';
+function detailHref(k,i,x){
+  const t=encodeURIComponent(x.t);
+  const ctxQ=(window.MH_CONTEXT&&window.MH_CONTEXT!=='mh')?'&ctx='+encodeURIComponent(window.MH_CONTEXT):'';
+  const from=encodeURIComponent(location.pathname.split('/').pop()+location.search+(location.hash||'#'+k));
+  if(k==='dis')return `discussion-thread.html?t=${t}&from=${from}`;
+  if(k==='res')return `resource-detail.html?t=${t}&type=${encodeURIComponent(x.kind||'link')}&from=${from}`;
+  if(k==='feed')return `feed-detail.html?t=${t}&video=${x.video?1:0}&from=${from}`;
+  return '';
+}
+function itemHTML(k,x,i,v){
+  const d=`data-i="${i}"`;
+  if(v=='list')return `<div class="lrow" ${d}>${num(k,i)}<span class="lt">${esc(x.t)}</span>${x.video?'<i class="lvid" data-ic="video"></i>':''}<span class="chev">&#8250;</span></div>`;
+  if(v=='compact')return k=='sub'
+    ?`<div class="row" ${d}>${num(k,i)}<div class="ph">photo</div><div class="rinfo"><b>${esc(x.t)}</b>${chips(x.chips)}</div></div>`
+    :`<div class="item" ${d}><span class="tag">${esc(x.tag)}</span>${esc(x.t)}${x.video?vtile('vsm'):''}<span class="meta">${esc(x.meta)}</span></div>`;
+  if(v=='post')return `<article class="pcard" ${d}>${x.video?vtile('pimg'):`<div class="ph pimg">photo${k=='sub'?`<span class="pnum">${num(k,i)}</span>`:''}</div>`}
+    ${x.tag?`<span class="tag">${esc(x.tag)}</span>`:''}<h4>${esc(x.t)}</h4><p>${esc(x.text)}</p>${chips(x.chips)}</article>`;
+  return `<div class="fsi" ${d}>${x.video?vtile('fsbg vfs'):'<div class="fsbg">image</div>'}<div class="fsgrad"></div>
+    <div class="fsact"><button aria-label="Like"><i data-ic="thumbs-up"></i></button><small>${120+i*37}</small><button aria-label="Save"><i data-ic="bookmark"></i></button><small>Save</small><button aria-label="Comments"><i data-ic="message-circle"></i></button><small>${8+i*5}</small></div>
+    <div class="fstext">${x.tag?`<span class="fstag">${esc(x.tag)}</span>`:`<span class="fstag">#${i+1} in ${names[k]}</span>`}<h3>${esc(x.t)}</h3><p>${esc(x.text)}</p>${chips(x.chips)}</div></div>`;
+}
+function visibleItems(k){
+  const q=filterQ.trim().toLowerCase();
+  const items=DATA[k];
+  if(!q)return items.map((x,i)=>({x,i}));
+  return items.map((x,i)=>({x,i})).filter(({x})=>x.t.toLowerCase().includes(q)||(x.text||'').toLowerCase().includes(q)||(x.meta||'').toLowerCase().includes(q));
+}
+function render(k){
+  const s=document.getElementById(k);if(!s)return;const v=viewOf(k),vis=visibleItems(k);
+  s.dataset.view=v;
+  if(v=='full'){
+    s.innerHTML=`<div class="fs" id="fs-${k}"><div class="fshead">${names[k]}<span class="sep">·</span><span id="fsn-${k}">1 / ${vis.length||1}</span></div>${vis.length?vis.map(({x,i})=>itemHTML(k,x,i,v)).join(''):'<p class="emptyq">No matches in this section</p>'}</div>`;
+    const fs=s.querySelector('.fs');if(fs&&vis.length)fs.addEventListener('scroll',()=>{const n=Math.round(fs.scrollTop/fs.clientHeight)+1;document.getElementById('fsn-'+k).textContent=n+' / '+vis.length},{passive:true});
+  } else s.innerHTML=(k=='sub'?'':tabs)+`<div class="vlist v-${v}">`+(vis.length?vis.map(({x,i})=>itemHTML(k,x,i,v)).join(''):'<p class="emptyq">No matches in this section</p>')+'</div>';
+  if(window.paintIcons)paintIcons(s);
+  syncBody();
+}
+function syncBody(){const full=viewOf(cur)=='full';if(full&&!document.body.classList.contains('fs-on'))scrollTo(0,0);document.body.classList.toggle('fs-on',full)}
+for(const k of Object.keys(names)){if(!document.getElementById(k)){const s=document.createElement('section');s.id=k;main.appendChild(s)}render(k)}
+// clicks: item navigation
+main.addEventListener('click',e=>{
+  if(e.target.closest('.num,.fsact'))return;
+  const it=e.target.closest('[data-i]');if(!it)return;const k=it.closest('section').id,x=DATA[k][+it.dataset.i];
+  if(k=='sub'){const ctx=(window.MH_CONTEXT&&window.MH_CONTEXT!=='mh')?'&ctx='+encodeURIComponent(window.MH_CONTEXT):'';let base=x.href||('subtopic3.html?t='+encodeURIComponent(x.t)+'&path='+encodeURIComponent([...(window.TOPIC_PATH||['Modern Hippie']),x.t].join('>')));if(ctx&&!base.includes('ctx='))base+=ctx;location.href=base}
+  else{const href=detailHref(k,+it.dataset.i,x);if(href)location.href=href;else toast('Open: coming soon')}
+});
+main.addEventListener('click',e=>{const b=e.target.closest('.fsact button');if(b){e.stopPropagation();b.classList.toggle('on')}},true);
+let tt;function toast(t){let el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el)}
+ el.textContent=t;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),1800)}
+function show(s){cur=s;document.getElementById('toast')?.classList.remove('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==s));document.querySelectorAll('main section').forEach(x=>x.classList.toggle('on',x.id==s));document.getElementById('label').textContent=names[s];syncBody();if(window.onSectionChange)window.onSectionChange(s)}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.s));
+const h=location.hash.slice(1);show(names[h]?h:'sub');
+window.showSection=show;
+window.getView=()=>viewOf(cur);
+window.setView=v=>{if(v==='full'||v==='video'){if(window.toast)toast('Full screen coming soon');return}if(!['list','compact','post'].includes(v))return;localStorage.setItem(key(cur),v);render(cur)};
+window.currentSection=()=>cur;
+window.sectionLabel=()=>names[cur];
+window.sectionSearchNoun=()=>({sub:'subtopics',feed:'posts',dis:'discussions',res:'resources'}[cur]||'items');
+window.toast=toast;
+window.filterSection=q=>{filterQ=q||'';render(cur);return visibleItems(cur).map(({x})=>({t:x.t,meta:x.meta||'',video:!!x.video}))};
+window.clearSectionFilter=()=>{filterQ='';render(cur)};
+window.getSectionMatches=q=>{
+  const qq=(q||'').trim().toLowerCase();
+  return DATA[cur].filter(x=>!qq||x.t.toLowerCase().includes(qq)||(x.text||'').toLowerCase().includes(qq)||(x.meta||'').toLowerCase().includes(qq));
+};
+window.addPlaceholderItem=(k,item)=>{
+  const row={t:item.t,meta:item.meta||'Just now',tag:item.tag||'from you',text:item.text||LOREM[0],chips:item.chips||['New'],video:!!item.video,kind:item.kind||'',href:item.href||''};
+  DATA[k].unshift(row);if(k==='sub')GLOBAL_TAKEN.push(item.t);filterQ='';render(k);show(k);return row;
+};
+window.isSubtopicTaken=name=>{
+  const n=(name||'').trim().toLowerCase();
+  if(!n)return false;
+  const taken=new Set([...GLOBAL_TAKEN,...DATA.sub.map(x=>x.t)].map(s=>s.toLowerCase()));
+  return taken.has(n);
+};
+window.CREATE_TYPES=[
+  {k:'sub',label:'New subtopic',ic:'git-fork'},
+  {k:'feed',label:'Write a post',ic:'image-plus'},
+  {k:'dis',label:'Start a discussion',ic:'message-circle'},
+  {k:'res',label:'Add a resource',ic:'bookmark'}
+];
+})();

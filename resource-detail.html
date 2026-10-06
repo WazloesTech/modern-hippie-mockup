@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="home7.html#res" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Resource</h1></div>
+  <div class="rtype" id="rtype"><i data-ic="bookmark"></i><span id="rtypeLab">Link</span></div>
+  <p class="dbody" id="desc">Example resource description. Placeholder text explaining what this resource is, who it helps, and why someone might open or save it.</p>
+  <div class="dbtns"><button type="button" class="asbtn pri" id="open">Open</button><button type="button" class="asbtn tog" id="save"><i data-ic="bookmark"></i> Save</button></div>
+  <p class="asnote" id="note" style="margin-top:16px" hidden></p>
+</main>
+<script src="icons3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'Example resource: a beginner guide';
+const typ=(P.get('type')||'link').toLowerCase();
+const from=P.get('from')||'home7.html#res';
+$('back').href=from;$('title').textContent=T;document.title=T;
+$('rtypeLab').textContent=typ==='file'?'File':'Link';
+paintIcons();
+$('open').onclick=()=>{$('note').hidden=false;$('note').textContent=typ==='file'?'Open file: coming soon (example)':'Open link: coming soon (example)'};
+$('save').onclick=()=>$('save').classList.toggle('on');
+</script></body></html>

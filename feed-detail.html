@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="home7.html#feed" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Post</h1></div>
+  <div class="dop"><div class="dav"><i data-ic="user"></i></div><div><b>@wren</b><div class="dmeta" id="meta">2h · example post</div></div></div>
+  <div id="vwrap" class="dvsoon" hidden><div class="vtile pimg"><i data-ic="video"></i><span>Video coming soon</span></div></div>
+  <p class="dbody" id="body">Example text post. This is the full post body — no video player here. If the feed item was marked as video, a “Video coming soon” tile shows above instead of a player.</p>
+  <div class="dacts"><button type="button" class="icbtn tog" id="like" aria-label="Like"><i data-ic="thumbs-up"></i></button><button type="button" class="icbtn tog" id="save" aria-label="Save"><i data-ic="bookmark"></i></button></div>
+</main>
+<script src="icons3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'Example post: a short update with a photo';
+const from=P.get('from')||'home7.html#feed';
+const video=P.get('video')==='1';
+$('back').href=from;$('title').textContent=T;document.title=T;
+if(video){$('vwrap').hidden=false;$('meta').textContent='1h · video post (player coming soon)'}
+paintIcons();
+document.querySelectorAll('.tog').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+</script></body></html>

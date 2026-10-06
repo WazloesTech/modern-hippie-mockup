@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"><style>main{padding-bottom:40px}.clip{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.clip br{display:none}</style></head><body><main>
+<div class="topbar"><a class="icbtn" id="back" href="#" aria-label="Back"><i data-ic="chevron-left"></i></a><div><small id="crumb">Mind</small><h2>Descriptions</h2></div></div>
+<div id="mainTxt" style="font-size:15px;line-height:1.55;color:#3d3830"></div><p class="sect" id="mainBy" style="margin-top:10px"></p>
+<button class="addbtn" id="add"><i data-ic="plus"></i>Add a description</button>
+<p class="sect">All descriptions, by votes</p>
+<div id="list"></div>
+</main><script src="icons3.js"></script><script>
+const $=id=>document.getElementById(id);
+const T=new URLSearchParams(location.search).get('t')||'Mind';$('crumb').textContent=T;
+const F=new URLSearchParams(location.search).get('from')||('subtopic3.html?t='+encodeURIComponent(T));$('back').href=F+'#info';
+const C=[{w:'@river',n:31,t:'Placeholder description A. This is the full, longer description of the topic. It covers what the topic is about, who it is for, and why it matters. It can run several paragraphs.<br><br>Second paragraph of placeholder text. Real wording will come from the community, and the version with the most votes is shown as the description.'},
+{w:'@sage',n:12,t:'Placeholder description B. A shorter alternative summary of the topic written by another member.'},
+{w:'@juniper',n:44,t:'Placeholder description C. A different take on the same topic, with its own focus and tone. Example text only.<br><br>It continues with a second short paragraph of placeholder text.'},
+{w:'@ash',n:3,t:'Placeholder description D. One sentence example.'},
+{w:'@wren',n:19,t:'Placeholder description E. Another alternative description, kept to a couple of lines of example text.'}];C.forEach(c=>c.v=0);
+const row=c=>`<div class="body">${c.m?'<span class="tagmain">Current description</span><br>':''}<span class="clip">${c.t.replace(/(<br>)+/g," ")}</span><span class="who">by ${c.w}</span></div>`;const showCur=c=>{$('mainTxt').innerHTML=c.t;$('mainBy').textContent='Current description · by '+c.w+' · '+c.n+' votes'};
+function draw(){C.sort((a,b)=>b.n-a.n);C.forEach((c,i)=>c.m=i==0);showCur(C[0]);
+$('list').innerHTML=C.map((c,i)=>`<div class="cand">${row(c)}<div class="votes"><button class="${c.v>0?'on':''}" data-i="${i}" data-d="1" aria-label="Vote up"><i data-ic="chevron-up"></i></button><b>${c.n}</b><button class="${c.v<0?'on':''}" data-i="${i}" data-d="-1" aria-label="Vote down"><i data-ic="chevron-down"></i></button></div></div>`).join('');paintIcons($('list'))}
+$('list').onclick=e=>{const b=e.target.closest('button');if(!b)return;const c=C[+b.dataset.i],d=+b.dataset.d;const nv=c.v==d?0:d;c.n+=nv-c.v;c.v=nv;draw()};
+$('add').onclick=()=>{const n={w:'@you',n:1,v:1,t:'Your new placeholder description.'};C.push(n);draw()};
+draw();
+</script></body></html>
