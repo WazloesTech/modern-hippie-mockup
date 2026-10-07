@@ -1,0 +1,58 @@
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Modern Hippie demos</title>
+<style>
+:root{--bg:#F4F0E8;--side:#F7F5F0;--card:#fffdf8;--ink:#1c1a17;--soft:#5f584d;--mute:#8a7f70;--line:#d9d2c3}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,serif}
+a{color:inherit}
+.wrap{display:flex;min-height:100vh}
+aside{width:260px;flex:none;background:var(--side);border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:6px}
+aside h1{font-size:19px;font-weight:400;margin:0 6px 16px}
+aside h2{font-size:13px;font-weight:400;color:var(--mute);margin:0 6px 4px}
+.ver{display:block;width:100%;text-align:left;font:inherit;font-size:16px;color:var(--ink);background:none;border:1px solid transparent;border-radius:12px;padding:9px 10px;cursor:pointer}
+.ver small{display:block;font-size:12px;color:var(--mute);margin-top:2px}
+.ver:hover{border-color:var(--line)}
+.ver.on{border-color:var(--ink);background:var(--card)}
+.grow{flex:1}
+.out button{font:inherit;font-size:14px;color:var(--soft);background:none;border:1px solid var(--line);border-radius:99px;padding:6px 14px;cursor:pointer}
+.out button:hover{border-color:var(--ink);color:var(--ink)}
+main{flex:1;min-width:0;padding:36px 32px}
+main h2{font-size:30px;font-weight:400;margin:0 0 4px}
+main .meta{color:var(--soft);font-size:15px;margin:0 0 22px}
+.acts{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-block;text-decoration:none;font-size:17px;border:1px solid var(--ink);border-radius:99px;padding:11px 20px;background:var(--card)}
+.btn.pri{background:var(--ink);color:var(--bg)}
+.btn:hover{opacity:.85}
+@media (max-width:640px){.wrap{flex-direction:column}aside{width:auto;border-right:0;border-bottom:1px solid var(--line)}.grow{display:none}.out{margin-top:8px}main{padding:24px 18px}}
+</style></head><body>
+<div class="wrap">
+<aside>
+  <h1>Modern Hippie demos</h1>
+  <h2>Versions</h2>
+  <div id="vers"></div>
+  <div class="grow"></div>
+  <form class="out" method="post" action="/auth/logout"><button type="submit">Log out</button></form>
+</aside>
+<main id="main"></main>
+</div>
+<script>
+// Add new demo versions here.
+const VERSIONS=[
+  {id:'v1',name:'Hybrid app demo',version:'v1',app:'/v1/',flows:'/v1/flows.html'}
+];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let cur=VERSIONS[0].id;
+function draw(){
+  document.getElementById('vers').innerHTML=VERSIONS.map(v=>`<button class="ver${v.id===cur?' on':''}" data-id="${v.id}">${esc(v.name)} · ${esc(v.version)}<small>Flow map + app</small></button>`).join('');
+  const v=VERSIONS.find(x=>x.id===cur);
+  document.getElementById('main').innerHTML=`<h2>${esc(v.name)} · ${esc(v.version)}</h2>
+  <p class="meta">Open the app, or open the flow map in a new tab.</p>
+  <div class="acts"><a class="btn pri" id="openApp" href="${v.app}">Open app</a>
+  <a class="btn" id="openFlows" href="${v.flows}" target="_blank" rel="noopener">Open flow map ↗</a></div>`;
+  document.querySelectorAll('.ver').forEach(b=>b.onclick=()=>{cur=b.dataset.id;draw()});
+}
+draw();
+</script>
+</body></html>

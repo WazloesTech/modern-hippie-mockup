@@ -1,0 +1,38 @@
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Log in · Modern Hippie demos</title>
+<style>
+:root{--bg:#F4F0E8;--card:#F7F5F0;--ink:#1c1a17;--soft:#5f584d;--mute:#8a7f70;--line:#d9d2c3;--err:#9a4a3c}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:Georgia,serif}
+main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+form{width:100%;max-width:360px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 24px}
+h1{font-size:26px;font-weight:400;margin:0 0 4px}
+p.sub{margin:0 0 22px;color:var(--soft);font-size:15px}
+label{display:block;font-size:14px;color:var(--soft);margin:0 0 14px}
+input{display:block;width:100%;margin-top:6px;font:inherit;font-size:17px;color:var(--ink);background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+input:focus{outline:none;border-color:var(--ink)}
+button{width:100%;margin-top:6px;font:inherit;font-size:17px;background:var(--ink);color:var(--bg);border:1px solid var(--ink);border-radius:99px;padding:11px 16px;cursor:pointer}
+.msg{font-size:14px;margin:0 0 14px;padding:9px 12px;border-radius:10px;display:none}
+.msg.err{display:block;color:var(--err);border:1px solid #e0c3bb;background:#fbf1ee}
+.msg.ok{display:block;color:var(--soft);border:1px solid var(--line);background:#fffdf8}
+</style></head><body>
+<main>
+<form method="post" action="/auth/login" autocomplete="on">
+  <h1>Modern Hippie demos</h1>
+  <p class="sub">Log in to see the demos.</p>
+  <p class="msg" id="msg" role="alert"></p>
+  <label>Email<input type="email" name="email" autocomplete="username" required autofocus></label>
+  <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+  <input type="hidden" name="next" id="next" value="/">
+  <button type="submit">Log in</button>
+</form>
+</main>
+<script>
+const q=new URLSearchParams(location.search),m=document.getElementById('msg');
+if(q.get('e')){m.textContent='Wrong email or password.';m.className='msg err'}
+else if(q.get('out')){m.textContent='You are logged out.';m.className='msg ok'}
+const n=q.get('next');if(n&&/^\/(?![\/\\])/.test(n))document.getElementById('next').value=n;
+</script>
+</body></html>
