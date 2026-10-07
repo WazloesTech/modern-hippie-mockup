@@ -14,6 +14,14 @@ label{display:block;font-size:14px;color:var(--soft);margin:0 0 14px}
 input{display:block;width:100%;margin-top:6px;font:inherit;font-size:17px;color:var(--ink);background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 input:focus{outline:none;border-color:var(--ink)}
 button{width:100%;margin-top:6px;font:inherit;font-size:17px;background:var(--ink);color:var(--bg);border:1px solid var(--ink);border-radius:99px;padding:11px 16px;cursor:pointer}
+.pw{position:relative;display:block;margin-top:6px}
+.pw input{margin-top:0;padding-right:46px}
+.pw .eye{position:absolute;top:0;right:0;bottom:0;width:44px;margin:0;padding:0;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:0 10px 10px 0;color:var(--mute);cursor:pointer}
+.pw .eye:hover{color:var(--ink)}
+.pw .eye:focus-visible{outline:2px solid var(--ink);outline-offset:-4px;border-radius:10px}
+.pw .eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.pw .eye .off,.pw .eye.on .show{display:none}
+.pw .eye.on .off{display:block}
 .msg{font-size:14px;margin:0 0 14px;padding:9px 12px;border-radius:10px;display:none}
 .msg.err{display:block;color:var(--err);border:1px solid #e0c3bb;background:#fbf1ee}
 .msg.ok{display:block;color:var(--soft);border:1px solid var(--line);background:#fffdf8}
@@ -24,7 +32,7 @@ button{width:100%;margin-top:6px;font:inherit;font-size:17px;background:var(--in
   <p class="sub">Log in to see the demos.</p>
   <p class="msg" id="msg" role="alert"></p>
   <label>Email<input type="email" name="email" autocomplete="username" required autofocus></label>
-  <label>Password<input type="password" name="password" autocomplete="current-password" required></label>
+  <label><span id="pwl">Password</span><span class="pw"><input type="password" name="password" id="pw" autocomplete="current-password" aria-labelledby="pwl" required><button type="button" class="eye" id="eye" aria-label="Show password" aria-controls="pw"><svg class="show" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg class="off" viewBox="0 0 24 24" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button></span></label>
   <input type="hidden" name="next" id="next" value="/">
   <button type="submit">Log in</button>
 </form>
@@ -33,6 +41,8 @@ button{width:100%;margin-top:6px;font:inherit;font-size:17px;background:var(--in
 const q=new URLSearchParams(location.search),m=document.getElementById('msg');
 if(q.get('e')){m.textContent='Wrong email or password.';m.className='msg err'}
 else if(q.get('out')){m.textContent='You are logged out.';m.className='msg ok'}
+const pw=document.getElementById('pw'),eye=document.getElementById('eye');
+eye.addEventListener('click',()=>{const show=pw.type==='password';pw.type=show?'text':'password';eye.classList.toggle('on',show);eye.setAttribute('aria-label',show?'Hide password':'Show password')});
 const n=q.get('next');if(n&&/^\/(?![\/\\])/.test(n))document.getElementById('next').value=n;
 </script>
 </body></html>
