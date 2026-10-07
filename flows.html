@@ -1,0 +1,346 @@
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Hybrid app demo · v1 · Flows</title>
+<style>
+:root{--bg:#F7F5F0;--lane:#F4F0E8;--ink:#1c1a17;--soft:#5f584d;--mute:#8a7f70;--line:#d9d2c3;--card:#fffdf8;--err:#9a4a3c}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:Georgia,serif;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+/* header */
+header{position:fixed;left:0;right:0;top:0;height:52px;display:flex;align-items:center;gap:14px;padding:0 14px;background:var(--bg);border-bottom:1px solid var(--line);z-index:20}
+header h1{font-size:17px;font-weight:400;margin:0;white-space:nowrap}
+#lanesNav{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
+#lanesNav::-webkit-scrollbar{display:none}
+.hb{border:1px solid transparent;background:none;border-radius:99px;padding:5px 11px;font-size:13px;white-space:nowrap}
+.hb:hover{border-color:var(--line)}
+.hb.on{border-color:var(--ink)}
+.tools{display:flex;align-items:center;gap:4px;flex:none}
+.tools .hb{border-color:var(--line);min-width:32px}
+#zl{font-size:12px;color:var(--soft);min-width:42px;text-align:center}
+#status{font-size:12px;color:var(--err);white-space:nowrap}
+/* canvas */
+#view{position:fixed;left:0;right:0;top:52px;bottom:0;overflow:hidden;touch-action:none;cursor:grab;background:var(--bg);
+  background-image:radial-gradient(#d9d2c3 1px,transparent 1px);background-size:24px 24px}
+#view.drag{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#edges{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;z-index:1}
+#edges path{fill:none;stroke:var(--ink);stroke-opacity:.45;stroke-width:2}
+.lane{position:absolute;left:0;background:var(--lane);border:1px solid var(--line);border-radius:22px}
+.lhead{position:absolute;left:24px;top:22px;width:280px;bottom:24px;display:flex;flex-direction:column;gap:12px}
+.lhead h2{font-size:34px;font-weight:400;margin:0;line-height:1.1}
+.lhead .lnum{font-size:14px;color:var(--mute);display:block;margin-bottom:4px}
+.lnotes{cursor:pointer;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px;-webkit-mask-image:linear-gradient(#000 85%,transparent);mask-image:linear-gradient(#000 85%,transparent)}
+.sticky{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;line-height:1.35;white-space:pre-wrap;word-break:break-word}
+.sticky small{display:block;color:var(--mute);font-size:12px;margin-top:6px}
+.sticky .on{font-size:12px;color:var(--soft);display:block;margin-bottom:4px}
+.nbtn{align-self:flex-start;border:1px solid var(--ink);background:var(--card);border-radius:99px;padding:8px 16px;font-size:16px}
+.nbtn:hover{background:var(--ink);color:var(--bg)}
+.node{position:absolute;z-index:2}
+.cap{display:flex;align-items:baseline;gap:8px;height:28px;font-size:15px;white-space:nowrap}
+.cap b{font-weight:400;overflow:hidden;text-overflow:ellipsis}
+.cap a{font-size:12px;color:var(--mute);margin-left:auto}
+.frame{position:relative;overflow:hidden;border-radius:16px;border:1px solid var(--line);background:#f4f0e8;box-shadow:0 1px 0 #e3dccd,0 8px 22px rgba(28,26,23,.08)}
+.frame iframe{position:absolute;left:0;top:0;width:390px;height:844px;border:0;transform-origin:0 0;pointer-events:none;background:#f4f0e8}
+.frame.nb{border:1.5px dashed var(--mute);background:transparent;box-shadow:none;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--soft)}
+.snb{margin-top:6px;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--soft)}
+.snb.has{border-color:var(--ink);color:var(--ink)}
+/* notes drawer */
+#drawer{position:fixed;right:12px;top:64px;bottom:12px;width:360px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 40px rgba(28,26,23,.16);z-index:30;display:none;flex-direction:column}
+#drawer.on{display:flex}
+.dh{display:flex;align-items:flex-start;gap:8px;padding:14px 14px 8px}
+.dh div{flex:1;min-width:0}
+.dh h3{margin:0;font-weight:400;font-size:19px}
+.dh small{color:var(--mute);font-size:12px}
+.x{border:0;background:none;font-size:22px;line-height:1;padding:2px 6px}
+#dlist{flex:1;overflow-y:auto;padding:4px 14px;display:flex;flex-direction:column;gap:8px}
+.note{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
+.note p{margin:0;white-space:pre-wrap;word-break:break-word;font-size:14px;line-height:1.4}
+.note .meta{display:flex;gap:10px;align-items:center;margin-top:8px;font-size:12px;color:var(--mute)}
+.note .meta span{flex:1}
+.note .meta button,.lk{border:0;background:none;padding:2px 0;font-size:12px;color:var(--soft);text-decoration:underline}
+.note .meta button.warn{color:var(--err)}
+.note textarea{width:100%}
+.empty{color:var(--mute);font-size:13px;margin:6px 0}
+.sh{font-size:12px;color:var(--mute);margin:10px 0 0;text-transform:none}
+.snote{cursor:pointer}
+.snote .on{font-size:12px;color:var(--soft);display:block;margin-bottom:3px}
+.dadd{border-top:1px solid var(--line);padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+textarea{font:inherit;font-size:14px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;resize:vertical;min-height:70px;background:#fff;color:var(--ink)}
+textarea:focus{outline:none;border-color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center}
+.pri{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:99px;padding:7px 16px;font-size:14px}
+.pri:disabled{opacity:.4;cursor:default}
+.sec{border:1px solid var(--line);background:none;border-radius:99px;padding:7px 14px;font-size:14px}
+.err{color:var(--err);font-size:12px;min-height:14px;margin:0}
+@media (max-width:700px){
+  header{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 10px;gap:6px 10px}
+  header h1{font-size:15px}
+  #lanesNav{order:3;flex-basis:100%}
+  #drawer{left:0;right:0;bottom:0;top:auto;width:auto;max-width:none;height:70vh;border-radius:18px 18px 0 0}
+}
+</style></head><body>
+<header>
+  <h1 id="ttl">Hybrid app demo · v1</h1>
+  <nav id="lanesNav" aria-label="Flows"></nav>
+  <span id="status" role="status"></span>
+  <div class="tools">
+    <button class="hb" id="zOut" aria-label="Zoom out">−</button><span id="zl">100%</span><button class="hb" id="zIn" aria-label="Zoom in">+</button>
+    <button class="hb" id="zFit">Fit</button><button class="hb" id="reload">Reload</button>
+  </div>
+</header>
+<div id="view"><div id="world"><svg id="edges"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#1c1a17" fill-opacity=".55"/></marker></defs></svg></div></div>
+<aside id="drawer" aria-label="Notes">
+  <div class="dh"><div><h3 id="dTitle">Notes</h3><small id="dSub"></small></div><button class="x" id="dX" aria-label="Close">×</button></div>
+  <div id="dlist"></div>
+  <div class="dadd"><textarea id="dText" placeholder="Write a note" aria-label="New note"></textarea>
+    <p class="err" id="dErr"></p>
+    <div class="row"><button class="pri" id="dAdd">Add note</button></div></div>
+</aside>
+<script>
+// ---------- config ----------
+const DEMO={app:'Hybrid app',demo:'Hybrid app demo',version:'v1'};
+const SB_URL='https://rdriiomnfseeeuwcelfm.supabase.co/rest/v1/';
+const SB_KEY='sb_publishable_ShBpsr1N2vnCxxBUtSwD3w_98HCJ3iG'; // publishable key: safe in the browser, RLS limits it to demo notes
+const S=0.4, NW=Math.round(390*S), NH=Math.round(844*S); // node size
+const COL=NW+96, ROW=NH+28+34+48, X0=360, LTOP=86, LGAP=60;
+
+// ---------- flows ----------
+// n(key,label,url,[col,row],from)   url null = Not built. from = key(s); default = previous node
+const n=(k,t,u,at,from)=>({k,t,u,at,from});
+const FLOWS=[
+ {k:'login',t:'Login',nodes:[n('login','',null,[0,0],[])]},
+ {k:'topics',t:'Topics',nodes:[
+   n('home','Home','home7.html',[0,0],[]),
+   n('topic','Topic','subtopic3.html?t=Mind',[1,0]),
+   n('nested','Nested','subtopic3.html?t=Running&path=Modern Hippie>Body>Fitness>Running',[2,0]),
+   n('menu','Menu','subtopic3.html?t=Running&path=Modern Hippie>Body>Fitness>Running&open=menu',[3,0]),
+   n('path','Path','subtopic3.html?t=Running&path=Modern Hippie>Body>Fitness>Running&open=path',[4,0]),
+   n('deep','Deep path','subtopic3.html?demo=deep&open=path',[5,0]),
+   n('create','Create','subtopic3.html?t=Running&path=Modern Hippie>Body>Fitness>Running&open=create',[4,1],'menu'),
+   n('newsub','New subtopic','subtopic3.html?t=Running&path=Modern Hippie>Body>Fitness>Running&open=create&type=sub',[5,1]),
+   n('place','Place info','subtopic3.html?t=Running&path=Modern Hippie>Body>Fitness>Running&open=create&type=sub&info=1',[6,1]),
+   n('info','Info','home7.html?open=info',[1,1],'home'),
+   n('images','Images','image3.html?t=Modern Hippie&from=home7.html',[2,1],'info'),
+   n('desc','Description','description3.html?t=Modern Hippie&from=home7.html',[2,2],'info'),
+   n('report','Report','home7.html?open=report',[2,3],'info'),
+   n('vote','Vote','home7.html?open=vote',[1,2],'home')]},
+ {k:'feed',t:'Feed',nodes:[
+   n('feed','Feed','home7.html#feed',[0,0],[]),
+   n('video','Video post','feed-detail.html?t=Example video post: a two-minute morning routine&type=video&video=1',[1,0]),
+   n('reply','Reply','feed-detail.html?t=Example video post: a two-minute morning routine&type=video&video=1&open=reply',[2,0]),
+   n('cont','Continue thread','continue-thread.html?t=Example video post: a two-minute morning routine&cid=c1a1a1a1a',[3,0]),
+   n('photo','Photo post','feed-detail.html?t=Example photo post: a short update with a photo&type=photo',[1,1],'feed'),
+   n('written','Written post','feed-detail.html?t=Example written post: what worked for me this week&type=written',[1,2],'feed'),
+   n('editpost','Edit post',null,[2,1],'video'),
+   n('delpost','Delete post',null,[2,2],'video'),
+   n('fcreate','Create','home7.html?open=create#feed',[1,3],'feed'),
+   n('write','Write post','home7.html?open=create&type=feed#feed',[2,3]),
+   n('ftools','Tools','home7.html?open=tools#feed',[1,4],'feed'),
+   n('fsearch','Search','home7.html?open=search&q=photo#feed',[2,4]),
+   n('fsort','Sort','home7.html?open=sort&dd=1#feed',[2,5],'ftools'),
+   n('fview','View','home7.html?open=view#feed',[2,6],'ftools'),
+   n('flist','List view','home7.html?view=list#feed',[3,6]),
+   n('fpost','Post view','home7.html?view=post#feed',[4,6])]},
+ {k:'people',t:'People',nodes:[
+   n('people','People','home7.html#people',[0,0],[]),
+   n('person','Person','people-detail.html?t=@river',[1,0]),
+   n('follow','Follow','people-detail.html?t=@river&open=follow',[2,0]),
+   n('psearch','Search','home7.html?open=search&q=sage#people',[1,1],'people'),
+   n('ppost','Post view','home7.html?view=post#people',[1,2],'people')]},
+ {k:'res',t:'Resources',nodes:[
+   n('res','Resources','home7.html#res',[0,0],[]),
+   n('rlink','Link','resource-detail.html?t=Example resource: a beginner guide&type=link',[1,0]),
+   n('ropen','Open','resource-detail.html?t=Example resource: a beginner guide&type=link&open=open',[2,0]),
+   n('redit','Edit resource',null,[2,1],'rlink'),
+   n('rdel','Delete resource',null,[2,2],'rlink'),
+   n('rfile','File','resource-detail.html?t=Example resource: a recommended book&type=file',[1,1],'res'),
+   n('radd','Add resource','home7.html?open=create&type=res#res',[1,2],'res'),
+   n('rsearch','Search','home7.html?open=search&q=book#res',[1,3],'res'),
+   n('rsort','Sort','home7.html?open=sort&dd=1#res',[1,4],'res')]},
+ {k:'profile',t:'Profile',nodes:[
+   n('ptop','Menu','home7.html?open=top',[0,0],[]),
+   n('prof','Profile','home7.html?open=profile',[1,0]),
+   n('pedit','Edit profile',null,[2,0]),
+   n('notif','Notifications','home7.html?open=notifications',[1,1],'ptop'),
+   n('nopen','Open alert',null,[2,1])]},
+ {k:'finance',t:'Finance',nodes:[
+   n('ftop','Menu','home7.html?open=top',[0,0],[]),
+   n('fnone','No card','home7.html?open=finance&bill=none',[1,0]),
+   n('fcard','Add card','home7.html?open=card&bill=none',[2,0]),
+   n('fmember','Member and plans','home7.html?open=finance&bill=member',[3,0]),
+   n('fupd','Update card','home7.html?open=card&bill=member',[4,0]),
+   n('fcancel','Cancel plan',null,[4,1],'fmember')]},
+ {k:'settings',t:'Settings',nodes:[
+   n('stop','Menu','home7.html?open=top',[0,0],[]),
+   n('set','Settings','home7.html?open=settings',[1,0]),
+   n('setitem','Setting page',null,[2,0])]},
+ {k:'context',t:'Context',nodes:[
+   n('cmh','Modern Hippie','home7.html?ctx=mh',[0,0],[]),
+   n('cpick','Switch','home7.html?ctx=mh&open=context',[1,0]),
+   n('cfollow','Follow','home7.html?ctx=follow',[2,0]),
+   n('cfpick','Switch','home7.html?ctx=follow&open=context',[3,0]),
+   n('cpers','Personal','home7.html?ctx=personal',[4,0]),
+   n('cpfeed','Personal feed','home7.html?ctx=personal#feed',[5,0]),
+   n('cffeed','Follow feed','home7.html?ctx=follow#feed',[3,1],'cfollow')]}
+];
+
+// ---------- helpers ----------
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=d=>new Date(d).toLocaleString('en-CA',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+function frameUrl(u){ // add flowmap=1 (and ctx=mh so frames never read another frame's context)
+  const [base,hash]=u.split('#');const [path,q]=base.split('?');const p=new URLSearchParams(q||'');
+  p.set('flowmap','1');if(/^(home7|subtopic3)\.html$/.test(path)&&!p.has('ctx'))p.set('ctx','mh');
+  return path+'?'+p.toString()+(hash?'#'+hash:'');
+}
+const openUrl=u=>{const [base,hash]=u.split('#');const [path,q]=base.split('?');const p=new URLSearchParams(q||'');return path+(q?'?'+p.toString():'')+(hash?'#'+hash:'')};
+
+// ---------- layout ----------
+const world=$('world'),view=$('view'),edges=$('edges');
+let y=0,maxW=0;const NODE={};
+FLOWS.forEach((f,fi)=>{
+  const cols=Math.max(...f.nodes.map(x=>x.at[0]))+1,rows=Math.max(...f.nodes.map(x=>x.at[1]))+1;
+  f.w=X0+cols*COL+20;f.h=Math.max(LTOP+rows*ROW,560);f.y=y;maxW=Math.max(maxW,f.w);
+  const lane=document.createElement('section');lane.className='lane';lane.id='lane-'+f.k;
+  lane.style.cssText=`top:${f.y}px;width:${f.w}px;height:${f.h}px`;
+  lane.innerHTML=`<div class="lhead"><h2><span class="lnum">Flow ${fi+1}</span>${esc(f.t)}</h2><button class="nbtn" data-notes="${f.k}">Notes</button><div class="lnotes" data-f="${f.k}" data-notes="${f.k}"></div></div>`;
+  world.appendChild(lane);
+  f.nodes.forEach((x,i)=>{
+    x.f=f.k;x.x=X0+x.at[0]*COL;x.y=f.y+LTOP+x.at[1]*ROW;NODE[f.k+'/'+x.k]=x;
+    if(x.from===undefined)x.from=i?[f.nodes[i-1].k]:[];else if(typeof x.from==='string')x.from=[x.from];
+    const el=document.createElement('div');el.className='node';el.style.cssText=`left:${x.x}px;top:${x.y}px;width:${NW}px`;
+    const cap=x.u?`<div class="cap"><b>${esc(x.t)}</b><a href="${esc(openUrl(x.u))}" target="_blank" rel="noopener">Open</a></div>`:`<div class="cap"><b>${esc(x.t)}</b></div>`;
+    el.innerHTML=cap+(x.u?`<div class="frame" style="width:${NW}px;height:${NH}px"><iframe tabindex="-1" scrolling="no" title="${esc(x.t)}" style="transform:scale(${S})"></iframe></div>`
+      :`<div class="frame nb" style="width:${NW}px;height:${NH}px">Not built</div>`)
+      +`<button class="snb" data-notes="${f.k}" data-s="${x.k}">Notes</button>`;
+    world.appendChild(el);x.el=el;
+  });
+  y+=f.h+LGAP;
+});
+const W=maxW,H=y-LGAP;
+world.style.width=W+'px';world.style.height=H+'px';edges.setAttribute('width',W);edges.setAttribute('height',H);
+let d='';
+FLOWS.forEach(f=>f.nodes.forEach(x=>x.from.forEach(k=>{const a=NODE[f.k+'/'+k];if(!a)return;
+  // right-angle connectors; arrows that leave one screen share a trunk just before the target column
+  const x1=a.x+NW+6,y1=a.y+28+NH/2,x2=x.x-8,y2=x.y+28+NH/2,xm=x.x-46,r=16,sg=y2>y1?1:-1;
+  d+=Math.abs(y2-y1)<1?`<path d="M${x1},${y1} H${x2}" marker-end="url(#ah)"/>`
+    :`<path d="M${x1},${y1} H${xm-r} Q${xm},${y1} ${xm},${y1+sg*r} V${y2-sg*r} Q${xm},${y2} ${xm+r},${y2} H${x2}" marker-end="url(#ah)"/>`;})));
+edges.insertAdjacentHTML('beforeend',d);
+$('lanesNav').innerHTML=FLOWS.map(f=>`<button class="hb" data-go="${f.k}">${esc(f.t)}</button>`).join('');
+
+// iframes: load in small batches so the page stays responsive
+function loadFrames(){
+  const list=[];FLOWS.forEach(f=>f.nodes.forEach(x=>{if(x.u)list.push(x)}));
+  let i=0;(function next(){list.slice(i,i+6).forEach(x=>{x.el.querySelector('iframe').src=frameUrl(x.u)});i+=6;if(i<list.length)setTimeout(next,120)})();
+}
+loadFrames();
+$('reload').onclick=()=>{FLOWS.forEach(f=>f.nodes.forEach(x=>{const fr=x.el.querySelector('iframe');if(fr)fr.src='about:blank'}));setTimeout(loadFrames,50);loadNotes()};
+
+// ---------- pan / zoom ----------
+let tx=40,ty=30,z=0.5;
+const ZMIN=0.08,ZMAX=2.5;
+function apply(save=true){world.style.transform=`translate(${tx}px,${ty}px) scale(${z})`;$('zl').textContent=Math.round(z*100)+'%';
+  if(save)try{localStorage.setItem('flows.view',JSON.stringify({tx,ty,z}))}catch(e){}}
+function zoomAt(nz,cx,cy){nz=Math.min(ZMAX,Math.max(ZMIN,nz));tx=cx-(cx-tx)*nz/z;ty=cy-(cy-ty)*nz/z;z=nz;apply()}
+function fitRect(x,y0,w,h,pad=30){const vw=view.clientWidth,vh=view.clientHeight;z=Math.min(ZMAX,Math.max(ZMIN,Math.min((vw-pad*2)/w,(vh-pad*2)/h)));tx=(vw-w*z)/2-x*z;ty=pad-y0*z;if(h*z<vh-pad*2)ty=(vh-h*z)/2-y0*z;apply()}
+const fitAll=()=>fitRect(0,0,W,H);
+function goLane(k){const f=FLOWS.find(x=>x.k===k);if(!f)return;
+  // tall lanes: keep screens readable and start at the top of the lane
+  const pad=20,vw=view.clientWidth,vh=view.clientHeight,wz=(vw-pad*2)/f.w,hz=(vh-pad*2)/f.h;
+  if(hz>=wz||hz>=0.45)fitRect(0,f.y,f.w,f.h,pad);else{z=Math.min(wz,0.45);tx=Math.max(pad,(vw-f.w*z)/2);ty=pad-f.y*z;apply()}document.querySelectorAll('#lanesNav .hb').forEach(b=>b.classList.toggle('on',b.dataset.go===k))}
+$('lanesNav').onclick=e=>{const b=e.target.closest('[data-go]');if(b)goLane(b.dataset.go)};
+$('zIn').onclick=()=>zoomAt(z*1.25,view.clientWidth/2,view.clientHeight/2);
+$('zOut').onclick=()=>zoomAt(z/1.25,view.clientWidth/2,view.clientHeight/2);
+$('zFit').onclick=fitAll;
+$('zl').ondblclick=()=>zoomAt(1,view.clientWidth/2,view.clientHeight/2);
+view.addEventListener('wheel',e=>{e.preventDefault();const r=view.getBoundingClientRect();
+  if(e.ctrlKey||e.metaKey)zoomAt(z*Math.exp(-e.deltaY*0.01),e.clientX-r.left,e.clientY-r.top);
+  else{tx-=e.deltaX;ty-=e.deltaY;apply()}},{passive:false});
+const pts=new Map();let last=null,dragged=false,down=null;
+view.addEventListener('pointerdown',e=>{if(e.button>0)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});last=null;if(pts.size===1){down={x:e.clientX,y:e.clientY};dragged=false}});
+view.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(!dragged){if(pts.size<2&&Math.hypot(e.clientX-down.x,e.clientY-down.y)<5)return;dragged=true;view.classList.add('drag');
+    pts.forEach((_,id)=>{try{view.setPointerCapture(id)}catch(_){}})}
+  const r=view.getBoundingClientRect(),p=[...pts.values()];
+  const cx=p.reduce((a,b)=>a+b.x,0)/p.length-r.left,cy=p.reduce((a,b)=>a+b.y,0)/p.length-r.top;
+  const dist=p.length>1?Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y):0;
+  if(last&&last.n===p.length){tx+=cx-last.cx;ty+=cy-last.cy;if(p.length>1&&last.dist>0)zoomAt(z*dist/last.dist,cx,cy);else apply()}
+  last={cx,cy,dist,n:p.length};
+});
+const up=e=>{pts.delete(e.pointerId);last=null;if(!pts.size)view.classList.remove('drag')};
+view.addEventListener('pointerup',up);view.addEventListener('pointercancel',up);
+// a drag should not also count as a click
+view.addEventListener('click',e=>{if(dragged){e.stopPropagation();e.preventDefault();dragged=false}},true);
+addEventListener('keydown',e=>{if(e.target.closest('textarea'))return;
+  if(e.key==='='||e.key==='+')$('zIn').click();else if(e.key==='-')$('zOut').click();else if(e.key==='0')fitAll();});
+view.addEventListener('scroll',()=>{view.scrollTop=0;view.scrollLeft=0});
+const syncTop=()=>{view.style.top=document.querySelector('header').offsetHeight+'px'};syncTop();
+addEventListener('resize',()=>{syncTop();apply(false)});
+const fitTop=()=>{z=Math.min(1,(view.clientWidth-60)/W);tx=30;ty=30;apply()};
+try{const v=JSON.parse(localStorage.getItem('flows.view')||'null');if(v&&isFinite(v.z)){tx=v.tx;ty=v.ty;z=v.z;apply(false)}else fitTop()}catch(e){fitTop()}
+// frames must never scroll the map itself
+
+
+// ---------- notes (Supabase) ----------
+const H_={apikey:SB_KEY,'Content-Type':'application/json',Prefer:'return=representation'};
+let demoId=null,NOTES=[],drawerFor=null;
+async function api(path,opt={}){const r=await fetch(SB_URL+path,{...opt,headers:{...H_,...(opt.headers||{})}});
+  if(!r.ok)throw new Error((await r.text())||r.status);const t=await r.text();return t?JSON.parse(t):null}
+const status=t=>{$('status').textContent=t||''};
+async function loadNotes(){
+  try{
+    if(!demoId){const q=`demo_demos?select=id&app_label=eq.${encodeURIComponent(DEMO.app)}&demo_label=eq.${encodeURIComponent(DEMO.demo)}&version=eq.${encodeURIComponent(DEMO.version)}`;
+      const rows=await api(q);if(!rows||!rows.length)throw new Error('demo not found');demoId=rows[0].id}
+    NOTES=await api(`demo_flow_notes?demo_id=eq.${demoId}&order=created_at.asc`)||[];status('');
+  }catch(e){console.error(e);status('Notes could not load')}
+  paintNotes();
+}
+const screenName=(f,s)=>{const x=NODE[f+'/'+s];return x?x.t:s};
+function paintNotes(){
+  FLOWS.forEach(f=>{
+    const box=document.querySelector(`.lnotes[data-f="${f.k}"]`),mine=NOTES.filter(x=>x.flow_key===f.k);
+    box.innerHTML=mine.slice().reverse().map(x=>`<div class="sticky">${x.screen_key?`<span class="on">${esc(screenName(f.k,x.screen_key))}</span>`:''}${esc(x.body)}<small>${fmt(x.updated_at||x.created_at)}</small></div>`).join('');
+    const b=document.querySelector(`.nbtn[data-notes="${f.k}"]`);b.textContent=mine.length?`Notes · ${mine.length}`:'Notes';
+    f.nodes.forEach(x=>{const c=mine.filter(m=>m.screen_key===x.k).length,btn=x.el.querySelector('.snb');btn.textContent=c?`Notes · ${c}`:'Notes';btn.classList.toggle('has',!!c)});
+  });
+  if(drawerFor)paintDrawer();
+}
+function openDrawer(f,s){drawerFor={f,s:s||null};$('dErr').textContent='';$('drawer').classList.add('on');paintDrawer();}
+function paintDrawer(){
+  const {f,s}=drawerFor,fl=FLOWS.find(x=>x.k===f);
+  $('dTitle').textContent=s?screenName(f,s):fl.t;
+  $('dSub').textContent=s?`${fl.t} · screen notes`:`${fl.t} · flow notes`;
+  const mine=NOTES.filter(x=>x.flow_key===f&&(x.screen_key||null)===s);
+  let h=mine.length?mine.map(noteHTML).join(''):'<p class="empty">No notes yet</p>';
+  if(!s){const sn=NOTES.filter(x=>x.flow_key===f&&x.screen_key);
+    if(sn.length)h+='<p class="sh">Screen notes</p>'+sn.map(x=>`<div class="note snote" data-jump="${esc(x.screen_key)}"><span class="on">${esc(screenName(f,x.screen_key))}</span><p>${esc(x.body)}</p><div class="meta"><span>${fmt(x.updated_at||x.created_at)}</span></div></div>`).join('');}
+  $('dlist').innerHTML=h;
+}
+function noteHTML(x){const ed=x.updated_at&&Math.abs(new Date(x.updated_at)-new Date(x.created_at))>1500;
+  return `<div class="note" data-id="${x.id}"><p>${esc(x.body)}</p><div class="meta"><span>${fmt(x.created_at)}${ed?' · edited '+fmt(x.updated_at):''}</span><button data-a="edit">Edit</button><button data-a="del">Delete</button></div></div>`}
+$('dX').onclick=()=>{$('drawer').classList.remove('on');drawerFor=null};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-notes]');if(b){e.stopPropagation();openDrawer(b.dataset.notes,b.dataset.s)}});
+$('dText').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey))$('dAdd').click()});
+$('dAdd').onclick=async()=>{const body=$('dText').value.trim();if(!body||!drawerFor)return;
+  $('dAdd').disabled=true;$('dErr').textContent='';
+  try{if(!demoId)await loadNotes();if(!demoId)throw new Error('no demo');
+    const [row]=await api('demo_flow_notes',{method:'POST',body:JSON.stringify({demo_id:demoId,flow_key:drawerFor.f,screen_key:drawerFor.s,body})});
+    NOTES.push(row);$('dText').value='';paintNotes();$('dlist').scrollTop=1e6}
+  catch(e){console.error(e);$('dErr').textContent='Could not save. Try again.'}
+  $('dAdd').disabled=false};
+$('dlist').addEventListener('click',async e=>{
+  const j=e.target.closest('[data-jump]');if(j&&!e.target.closest('button')){openDrawer(drawerFor.f,j.dataset.jump);return}
+  const b=e.target.closest('button');if(!b)return;const card=b.closest('.note'),id=card&&card.dataset.id,x=NOTES.find(n=>n.id===id);if(!x)return;
+  const a=b.dataset.a;$('dErr').textContent='';
+  if(a==='edit'){card.innerHTML=`<textarea>${esc(x.body)}</textarea><div class="row" style="margin-top:8px"><button class="pri" data-a="save">Save</button><button class="sec" data-a="cancel">Cancel</button></div>`;const t=card.querySelector('textarea');t.focus();t.setSelectionRange(t.value.length,t.value.length);return}
+  if(a==='cancel')return paintDrawer();
+  if(a==='del'){b.textContent='Delete for sure?';b.classList.add('warn');b.dataset.a='del2';return}
+  try{
+    if(a==='save'){const body=card.querySelector('textarea').value.trim();if(!body)return;b.disabled=true;
+      const [row]=await api('demo_flow_notes?id=eq.'+id,{method:'PATCH',body:JSON.stringify({body})});Object.assign(x,row);paintNotes()}
+    if(a==='del2'){b.disabled=true;await api('demo_flow_notes?id=eq.'+id,{method:'DELETE'});NOTES=NOTES.filter(n=>n.id!==id);paintNotes()}
+  }catch(err){console.error(err);b.disabled=false;$('dErr').textContent=a==='save'?'Could not save. Try again.':'Could not delete. Try again.'}
+});
+loadNotes();
+</script></body></html>

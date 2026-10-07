@@ -48,7 +48,9 @@ function flavorMeta(meta,i){
 DATA.sub=DATA.sub.map((x,i)=>({...x,chips:flavorChips(x.chips,i)}));
 ['feed','people','res'].forEach(k=>{DATA[k]=DATA[k].map((x,i)=>({...x,tag:flavorTag(x.tag,i),meta:flavorMeta(x.meta,i),chips:flavorChips(x.chips,i)}))});
 const key=k=>'mh.view.'+k;
-const viewOf=k=>{const v=localStorage.getItem(key(k));if(v==='full')return 'compact';return ['list','compact','post'].includes(v)?v:'compact'};
+// ?view=list|compact|post sets the view for this page load only (used by the flow map); nothing is saved
+let VQ=new URLSearchParams(location.search).get('view');if(!['list','compact','post'].includes(VQ))VQ=null;
+const viewOf=k=>{if(VQ)return VQ;const v=localStorage.getItem(key(k));if(v==='full')return 'compact';return ['list','compact','post'].includes(v)?v:'compact'};
 let cur='sub',filterQ='';
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const chips=a=>`<div class="chips">${(a||[]).map(c=>`<span>${esc(c)}</span>`).join('')}</div>`;
@@ -148,7 +150,7 @@ document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset
 const h=location.hash.slice(1);show(names[h]?h:'sub');
 window.showSection=show;
 window.getView=()=>viewOf(cur);
-window.setView=v=>{if(v==='full'||v==='video'){if(window.toast)toast('Full screen coming soon');return}if(!['list','compact','post'].includes(v))return;localStorage.setItem(key(cur),v);render(cur)};
+window.setView=v=>{if(v==='full'||v==='video'){if(window.toast)toast('Full screen coming soon');return}if(!['list','compact','post'].includes(v))return;if(VQ)VQ=v;else localStorage.setItem(key(cur),v);render(cur)};
 window.currentSection=()=>cur;
 window.sectionLabel=()=>names[cur];
 window.sectionSearchNoun=()=>({sub:'subtopics',feed:'posts',people:'people',res:'resources'}[cur]||'items');
