@@ -517,7 +517,7 @@ body.fs-on{overflow:hidden}
 .dbtns .asbtn.on{background:#e7e0d4;color:#1c1a17;border-color:#d9d2c3}
 .dbtns .icbtn{width:36px;height:36px}
 .dbtns .icbtn.on{border-color:#8a6f4a;color:#8a6f4a}
-.asbtn [data-ic]{width:16px;height:16px;flex:none}
+:where(.asbtn) [data-ic]{width:16px;height:16px;flex:none}
 .rsrc{margin:-4px 0 8px}
 .dvsoon{margin:0 0 16px}
 
