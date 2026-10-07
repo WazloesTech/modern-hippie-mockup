@@ -100,8 +100,8 @@ textarea:focus{outline:none;border-color:var(--ink)}
 <script>
 // ---------- config ----------
 const DEMO={app:'Hybrid app',demo:'Hybrid app demo',version:'v1'};
-const SB_URL='https://rdriiomnfseeeuwcelfm.supabase.co/rest/v1/';
-const SB_KEY='sb_publishable_ShBpsr1N2vnCxxBUtSwD3w_98HCJ3iG'; // publishable key: safe in the browser, RLS limits it to demo notes
+const SB_URL='https://wwhcutddatjdyimynfjw.supabase.co/rest/v1/'; // modern-hippie project, schema demo
+const SB_KEY='sb_publishable_DmLDRidMIxcotmLo_E8y-w_5LMrSDkH'; // publishable key: safe in the browser, RLS limits it to demo notes
 const S=0.4, NW=Math.round(390*S), NH=Math.round(844*S); // node size
 const COL=NW+96, ROW=NH+28+34+48, X0=360, LTOP=86, LGAP=60;
 
@@ -283,16 +283,16 @@ try{const v=JSON.parse(localStorage.getItem('flows.view')||'null');if(v&&isFinit
 
 
 // ---------- notes (Supabase) ----------
-const H_={apikey:SB_KEY,'Content-Type':'application/json',Prefer:'return=representation'};
+const H_={apikey:SB_KEY,'Content-Type':'application/json',Prefer:'return=representation','Accept-Profile':'demo','Content-Profile':'demo'};
 let demoId=null,NOTES=[],drawerFor=null;
 async function api(path,opt={}){const r=await fetch(SB_URL+path,{...opt,headers:{...H_,...(opt.headers||{})}});
   if(!r.ok)throw new Error((await r.text())||r.status);const t=await r.text();return t?JSON.parse(t):null}
 const status=t=>{$('status').textContent=t||''};
 async function loadNotes(){
   try{
-    if(!demoId){const q=`demo_demos?select=id&app_label=eq.${encodeURIComponent(DEMO.app)}&demo_label=eq.${encodeURIComponent(DEMO.demo)}&version=eq.${encodeURIComponent(DEMO.version)}`;
+    if(!demoId){const q=`demos?select=id&app_label=eq.${encodeURIComponent(DEMO.app)}&demo_label=eq.${encodeURIComponent(DEMO.demo)}&version=eq.${encodeURIComponent(DEMO.version)}`;
       const rows=await api(q);if(!rows||!rows.length)throw new Error('demo not found');demoId=rows[0].id}
-    NOTES=await api(`demo_flow_notes?demo_id=eq.${demoId}&order=created_at.asc`)||[];status('');
+    NOTES=await api(`flow_notes?demo_id=eq.${demoId}&order=created_at.asc`)||[];status('');
   }catch(e){console.error(e);status('Notes could not load')}
   paintNotes();
 }
@@ -325,7 +325,7 @@ $('dText').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrl
 $('dAdd').onclick=async()=>{const body=$('dText').value.trim();if(!body||!drawerFor)return;
   $('dAdd').disabled=true;$('dErr').textContent='';
   try{if(!demoId)await loadNotes();if(!demoId)throw new Error('no demo');
-    const [row]=await api('demo_flow_notes',{method:'POST',body:JSON.stringify({demo_id:demoId,flow_key:drawerFor.f,screen_key:drawerFor.s,body})});
+    const [row]=await api('flow_notes',{method:'POST',body:JSON.stringify({demo_id:demoId,flow_key:drawerFor.f,screen_key:drawerFor.s,body})});
     NOTES.push(row);$('dText').value='';paintNotes();$('dlist').scrollTop=1e6}
   catch(e){console.error(e);$('dErr').textContent='Could not save. Try again.'}
   $('dAdd').disabled=false};
@@ -338,8 +338,8 @@ $('dlist').addEventListener('click',async e=>{
   if(a==='del'){b.textContent='Delete for sure?';b.classList.add('warn');b.dataset.a='del2';return}
   try{
     if(a==='save'){const body=card.querySelector('textarea').value.trim();if(!body)return;b.disabled=true;
-      const [row]=await api('demo_flow_notes?id=eq.'+id,{method:'PATCH',body:JSON.stringify({body})});Object.assign(x,row);paintNotes()}
-    if(a==='del2'){b.disabled=true;await api('demo_flow_notes?id=eq.'+id,{method:'DELETE'});NOTES=NOTES.filter(n=>n.id!==id);paintNotes()}
+      const [row]=await api('flow_notes?id=eq.'+id,{method:'PATCH',body:JSON.stringify({body})});Object.assign(x,row);paintNotes()}
+    if(a==='del2'){b.disabled=true;await api('flow_notes?id=eq.'+id,{method:'DELETE'});NOTES=NOTES.filter(n=>n.id!==id);paintNotes()}
   }catch(err){console.error(err);b.disabled=false;$('dErr').textContent=a==='save'?'Could not save. Try again.':'Could not delete. Try again.'}
 });
 loadNotes();
