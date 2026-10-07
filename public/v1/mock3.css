@@ -512,8 +512,13 @@ body.fs-on{overflow:hidden}
 .dcomposer button{border:0;border-radius:99px;padding:10px 16px;background:#1c1a17;color:#f4f0e8;font:inherit;font-size:14px}
 .rtype{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#5f584d;background:#e7e0d4;padding:4px 10px;border-radius:99px;margin:0 0 12px}
 .rtype [data-ic]{width:14px;height:14px}
-.dbtns{display:flex;gap:10px;margin-top:8px}
-.dbtns .asbtn{text-shadow:none}
+.dbtns{display:flex;align-items:center;gap:10px;margin-top:8px}
+.dbtns .asbtn{flex:none;min-width:120px;padding:9px 22px;font-size:14px;text-shadow:none}
+.dbtns .asbtn.on{background:#e7e0d4;color:#1c1a17;border-color:#d9d2c3}
+.dbtns .icbtn{width:36px;height:36px}
+.dbtns .icbtn.on{border-color:#8a6f4a;color:#8a6f4a}
+.asbtn [data-ic]{width:16px;height:16px;flex:none}
+.rsrc{margin:-4px 0 8px}
 .dvsoon{margin:0 0 16px}
 
 /* ===== v18: search no-frost; create path; fullscreen soon ===== */

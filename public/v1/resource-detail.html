@@ -3,9 +3,9 @@
 <main class="dpage">
   <div class="dtop"><a class="icbtn" id="back" href="home7.html#res" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Resource</h1></div>
   <div class="rtype" id="rtype"><i data-ic="bookmark"></i><span id="rtypeLab">Link</span></div>
-  <p class="dbody" id="desc">Example resource description. Placeholder text explaining what this resource is, who it helps, and why someone might open or save it.</p>
-  <div class="dbtns"><button type="button" class="asbtn pri" id="open">Open</button><button type="button" class="asbtn tog" id="save"><i data-ic="bookmark"></i> Save</button></div>
-  <p class="asnote" id="note" style="margin-top:16px" hidden></p>
+  <p class="dmeta rsrc" id="src">example.com/beginner-guide</p>
+  <p class="dbody" id="desc">A short guide for people who are just starting out. It covers the first steps and common mistakes.</p>
+  <div class="dbtns"><button type="button" class="asbtn pri" id="open">Open</button><button type="button" class="icbtn tog" id="save" aria-label="Save" data-tip="Save"><i data-ic="bookmark"></i></button></div>
 </main>
 <script src="icons3.js"></script><script>
 const $=id=>document.getElementById(id);
@@ -15,7 +15,8 @@ const typ=(P.get('type')||'link').toLowerCase();
 const from=P.get('from')||'home7.html#res';
 $('back').href=from;$('title').textContent=T;document.title=T;
 $('rtypeLab').textContent=typ==='file'?'File':'Link';
+if(typ==='file'){$('src').textContent='recommended-book.pdf · 2.4 MB';$('desc').textContent='A book members often recommend. Easy to read in a weekend.'}
 paintIcons();
-$('open').onclick=()=>{$('note').hidden=false;$('note').textContent=typ==='file'?'Open file: coming soon (example)':'Open link: coming soon (example)'};
+$('open').onclick=()=>{$('open').classList.add('on');$('open').textContent='Opened'};
 $('save').onclick=()=>$('save').classList.toggle('on');
 </script><script src="open3.js"></script></body></html>
