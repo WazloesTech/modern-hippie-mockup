@@ -1,6 +1,6 @@
-// Shared sections (Subtopics / Feed / People / Resources): data, the four views, add rows, section switching.
+// Shared sections (Subtopics / Feed / Community / Resources): data, the four views, add rows, section switching.
 (function(){
-const names={sub:'Subtopics',feed:'Feed',people:'People',res:'Resources'};
+const names={sub:'Subtopics',feed:'Feed',people:'Community',res:'Resources'};
 const adds={sub:'Add a subtopic',feed:'Write a post',res:'Add a resource'};
 const VIEWS=['list','compact','post','full'];
 const main=document.querySelector('main');
