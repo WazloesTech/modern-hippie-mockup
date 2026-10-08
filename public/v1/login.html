@@ -1,0 +1,25 @@
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Log in · Modern Hippie</title>
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="auth">
+  <div class="authhead"><h1>Welcome back</h1><p>Sign in to your account</p></div>
+  <form class="cform" id="f" novalidate>
+    <label class="cfield"><span>Email</span><span class="cin"><i data-ic="mail"></i><input type="email" id="email" placeholder="you@example.com" autocomplete="off"></span></label>
+    <div class="cfield"><span class="flab"><label for="pw">Password</label><a href="forgot-password.html" id="forgot">Forgot?</a></span><span class="cin"><i data-ic="lock"></i><input type="password" id="pw" placeholder="Enter your password" autocomplete="off"></span></div>
+    <p class="cerr" id="err" hidden></p>
+    <button type="submit" class="asbtn pri wide" id="go">Sign in</button>
+  </form>
+  <p class="author">Or continue with</p>
+  <div class="authalt"><button type="button" class="asbtn wide" data-go>Google</button><button type="button" class="asbtn wide" data-go>Apple</button></div>
+  <p class="authfoot">Don't have an account? <a href="signup.html" id="toSignup">Sign up</a></p>
+</main>
+<script src="icons3.js"></script><script>
+// demo only: no real sign-in. Any email and password opens the app.
+const $=id=>document.getElementById(id);
+paintIcons();
+const home=()=>{location.href='home7.html'};
+$('f').onsubmit=e=>{e.preventDefault();
+  if(!$('email').value.trim()||!$('pw').value){$('err').hidden=false;$('err').textContent='Please enter your email and password.';return}
+  home()};
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=home);
+</script><script src="open3.js"></script></body></html>

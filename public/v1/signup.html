@@ -1,0 +1,32 @@
+<!doctype html><html lang="en-CA"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign up · Modern Hippie</title>
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="auth" id="form">
+  <div class="authhead"><h1>Create your account</h1><p>Join the Modern Hippie community</p></div>
+  <form class="cform" id="f" novalidate>
+    <label class="cfield"><span>Email</span><span class="cin"><i data-ic="mail"></i><input type="email" id="email" placeholder="you@example.com" autocomplete="off"></span></label>
+    <label class="cfield"><span>Password</span><span class="cin"><i data-ic="lock"></i><input type="password" id="pw" placeholder="At least 6 characters" autocomplete="off"></span></label>
+    <p class="cerr" id="err" hidden></p>
+    <button type="submit" class="asbtn pri wide" id="go">Sign up</button>
+  </form>
+  <p class="author">Or continue with</p>
+  <div class="authalt"><button type="button" class="asbtn wide" data-go>Google</button><button type="button" class="asbtn wide" data-go>Apple</button></div>
+  <p class="authfoot">Already have an account? <a href="login.html" id="toLogin">Log in</a></p>
+</main>
+<main class="auth" id="sent" hidden>
+  <div class="authhead"><h1>Check your email</h1><p>We've sent a confirmation link to <b id="who">you@example.com</b></p><p style="margin-top:16px;font-size:14px">Click the link in the email to complete your sign up</p></div>
+  <a class="authback" href="login.html" id="sentBack">Back to login</a>
+</main>
+<script src="icons3.js"></script><script>
+// demo only: no account is made. Sign up shows the real app's "Check your email" step.
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+paintIcons();
+if(P.get('sent')==='1'){$('form').hidden=true;$('sent').hidden=false;$('who').textContent=P.get('email')||'you@example.com';document.title='Check your email · Modern Hippie'}
+$('f').onsubmit=e=>{e.preventDefault();
+  const em=$('email').value.trim(),pw=$('pw').value;
+  const err=!/^\S+@\S+\.\S+$/.test(em)?'Please enter a valid email.':pw.length<6?'Password must be at least 6 characters.':'';
+  if(err){$('err').hidden=false;$('err').textContent=err;return}
+  location.href='signup.html?sent=1&email='+encodeURIComponent(em)};
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{location.href='home7.html'});
+</script><script src="open3.js"></script></body></html>

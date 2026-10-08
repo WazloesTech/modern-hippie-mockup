@@ -6,6 +6,7 @@ Private demo site, served at https://demo.modernhippie.com (Vercel project `mode
 - `public/index.html` – version picker (add new versions to the `VERSIONS` list)
 - `public/v1/` – Hybrid app demo v1 (lo-fi mockup app, entry `home7.html`)
 - `public/v1/flows.html` – v1 flow map (live screens + notes in Supabase `demo` schema)
+- `public/v1/login.html`, `signup.html`, `forgot-password.html`, `reset-password.html` – the app's own log in / sign up screens (lo-fi copies of modernhippie.com; demo only, no real auth). Not the same as the demo gate at `/login`.
 - `middleware.js` – Vercel Routing Middleware; every path except `/login` needs a valid session for the allowed account
 - `index.html` (repo root) – redirect for the old GitHub Pages URL
 
