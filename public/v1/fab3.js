@@ -124,17 +124,31 @@ const chev='<i class="aschev" data-ic="chevron-right"></i>';
 const row=(ic,l,v)=>`<button class="asrow"><i class="asic" data-ic="${ic}"></i><span class="asl">${l}</span>${v?`<span class="asv">${v}</span>`:''}${chev}</button>`;
 const kv=(k,v)=>`<div class="askv"><span>${k}</span><b>${v}</b></div>`;
 const EX='<p class="asex">Example data</p>';
+// notifications: each one opens what it is about; Back on that page returns to this list
+const MYPOST='feed-detail.html?t='+encodeURIComponent('Example video post: a two-minute morning routine')+'&type=video&video=1&by=%40you';
+const MYRES='resource-detail.html?t='+encodeURIComponent('Example resource: a beginner guide')+'&type=link&by=%40you';
 const NOTIFS=[
-  {ic:'heart',t:'@river liked your post',meta:'2h · Like'},
-  {ic:'message-circle',t:'@sage commented on your post',meta:'5h · Comment'},
-  {ic:'bookmark',t:'@juniper saved your resource',meta:'1d · Save'},
-  {ic:'bell',t:'Welcome to Modern Hippie',meta:'3d · System'}
+  {ic:'heart',t:'@river liked your post',meta:'2h · Like',go:MYPOST},
+  {ic:'message-circle',t:'@moss replied to your comment',meta:'3h · Reply',go:MYPOST+'&hl=c4a'},
+  {ic:'users',t:'@juniper started following you',meta:'5h · Follow',go:'people-detail.html?t=%40juniper'},
+  {ic:'bookmark',t:'@sage saved your resource',meta:'1d · Save',go:MYRES},
+  {ic:'bell',t:'Welcome to Modern Hippie. Add a photo and a short bio.',meta:'3d · System',go:'#editprofile'}
 ];
+function notifFrom(){const u=new URL(location.href);['open','item','bill','flowmap'].forEach(k=>u.searchParams.delete(k));u.searchParams.set('open','notifications');return u.pathname.split('/').pop()+u.search+u.hash}
+// profile
+const FOCUSES=['Body','Mind','Soul','Business','Family','Community'];
+const PROF={name:'Example Name',handle:'examplename',bio:'Learning to slow down. Morning walks and good books.',focuses:['Mind','Body'],photo:false};
+function profileHTML(){return `${EX}<div class="asprof"><div class="asav${PROF.photo?' ph':''}">${PROF.photo?'photo':'<i data-ic="user"></i>'}</div><div><div class="asname">${esc(PROF.name)}</div><div class="asmeta">@${esc(PROF.handle)}</div><div class="asmeta">Joined March 2026</div></div></div>
+   ${PROF.bio?`<p class="asnote asbio">${esc(PROF.bio)}</p>`:''}<div class="chips asfoc">${PROF.focuses.map(f=>`<span>${f}</span>`).join('')}</div>
+   <div class="asrows">${row('user-pen','Edit profile').replace('class="asrow"','class="asrow" id="asEditProf"')}</div>`}
+// settings
+const SET={notif:{likes:true,comments:true,replies:true,follows:true,saves:false,pods:true,weekly:false},lang:'English',theme:'Light',vis:'Everyone',priv:{focuses:true,follow:true,search:true}};
+const SET_ROWS=[['notifications','bell','Notifications',()=>Object.values(SET.notif).some(Boolean)?'On':'Off'],['language','globe','Language',()=>SET.lang],['theme','sun-moon','Theme',()=>SET.theme],['privacy','shield','Privacy',()=>SET.vis],['account','user','Account',()=>'']];
+function settingsHTML(){return `${EX}<div class="asrows">${SET_ROWS.map(([k,ic,l,v])=>row(ic,l,v()).replace('class="asrow"',`class="asrow" data-set="${k}"`)).join('')}</div>`}
 const SCREENS={
- Profile:['Profile',`${EX}<div class="asprof"><div class="asav"><i data-ic="user"></i></div><div><div class="asname">Example Name</div><div class="asmeta">@examplename</div><div class="asmeta">Joined March 2026</div></div></div>
-   <div class="asrows">${row('user-pen','Edit profile')}</div>`],
- Notifications:['Notifications',`${EX}<div class="nlist">${NOTIFS.map(n=>`<button type="button" class="nrow"><i class="asic" data-ic="${n.ic}"></i><span class="nbody"><b>${n.t}</b><small>${n.meta}</small></span></button>`).join('')}</div>`],
- Settings:['Settings',`${EX}<div class="asrows">${row('bell','Notifications','On')}${row('globe','Language','English')}${row('sun-moon','Theme','Light')}${row('shield','Privacy','')}</div>`]};
+ Profile:['Profile',profileHTML],
+ Notifications:['Notifications',()=>`${EX}<div class="nlist">${NOTIFS.map((n,i)=>`<button type="button" class="nrow" data-n="${i}"><i class="asic" data-ic="${n.ic}"></i><span class="nbody"><b>${n.t}</b><small>${n.meta}</small></span>${chev}</button>`).join('')}</div>`],
+ Settings:['Settings',settingsHTML]};
 const FOUNDERS=[['Gold','#d4a017',250,1000],['Green','#2f8f46',300,1500],['Indigo','#3f37c9',350,1600],['Red','#d1242f',400,1400],['Copper','#b87333',475,1200],['Yellow','#e6c200',550,1000],['Orange','#f0671e',650,850],['Pink','#ff4fa3',750,700],['Violet','#9b30ff',875,450],['Silver','#9aa3ad',1000,300]];
 function financeHTML(state){
   const has=state==='member';
@@ -143,9 +157,10 @@ function financeHTML(state){
     ?`<div class="askvs"><button class="askv ascard" type="button"><span>Card</span><b>Visa ending in **** 4242</b></button>${kv('Next payment','November 4, 2026')}</div><div class="asbtns"><button class="asbtn">Update card</button></div>`
     :`<button class="asbtn pri wide asaddcard"><i data-ic="credit-card"></i> Add credit card</button><p class="asnote">Add a card to start a membership.</p>`;
   const plan=(price,key,star,lab,desc,on)=>`<button class="mplan${on?' on':''}" data-v="${key}"><span class="mstar ${star}"><i data-ic="star"></i></span><div class="mbody"><b>$${price}<small>/mo</small></b><span class="mlab">${lab}</span><p>${desc}</p></div>${on?'<i class="mck" data-ic="check"></i>':''}</button>`;
-  const plans=`<h5 class="ash5">Monthly</h5><div class="mplans">${plan(5,'growth','gold','Growth tools','Non-AI: progress tracking, offline saves, post stats, profile customization, more pods, supporter badge, small gift allowance.',false)}${plan(15,'ai','silver','Growth tools + AI','Everything in $5, plus AI guide, AI journal reflection and a bigger gift allowance. Founders get this for life with a fair-use AI cap.',has)}</div>`;
+  const plans=`<h5 class="ash5">Monthly</h5><div class="mplans">${plan(5,'growth','gold','Growth tools','Non-AI: progress tracking, offline saves, post stats, profile customization, more pods, supporter badge, small gift allowance.',false)}${plan(15,'ai','silver','Growth tools + AI','Everything in $5, plus AI guide, AI journal reflection and a bigger gift allowance. Founders get this for life with a fair-use AI cap.',has||state==='cancelled')}</div>`;
   const ftiers=`<h5 class="ash5">Founder passes <small>least → most</small></h5><div class="ftiers">${FOUNDERS.map(([n,c,p,s])=>`<button class="ftier" data-v="${n}"><span class="fdot" style="background:${c}"></span><span class="fn">${n}</span><b>$${fmt(p)}</b><small>${fmt(s)} passes</small></button>`).join('')}</div><p class="asnote">Founders show a coloured circle only — no silver star. Same perks at every tier.</p>`;
-  return EX+pay+plans+ftiers+(has?`<button class="aslink">Cancel subscription</button>`:'');
+  if(state==='cancelled')return EX+`<div class="askvs"><button class="askv ascard" type="button"><span>Card</span><b>Visa ending in **** 4242</b></button>${kv('Plan ends','November 4, 2026')}</div><p class="asnote">No more payments. You keep Growth tools + AI until then.</p><div class="asbtns"><button class="asbtn pri" id="asKeep">Keep plan</button></div>`+plans.replace(' on"',' "')+ftiers;
+  return EX+pay+plans+ftiers+(has?`<button class="aslink" id="asCancel">Cancel plan</button>`:'');
 }
 window.openScreen=openScreen;
 function setAsHead(mode,onBack){
@@ -160,9 +175,81 @@ function openScreen(k,state){
   twrap.classList.add('open');catcher.classList.add('on');twrap.classList.add('screen');
   if(k==='Finance'){const st=state||window.BILLING_DEMO||window._finState||'member';window._finState=st;$('asTitle').textContent='Finance';$('asBody').innerHTML=financeHTML(st);asc.dataset.state=st;setAsHead('x')}
   else if(k==='Card'){openCard();return}
-  else{const [t,h]=SCREENS[k];$('asTitle').textContent=t;$('asBody').innerHTML=h;setAsHead('x')}
-  paintIcons(asc);asc.classList.add('on');asc.dataset.k=k;wireFinance();
+  else{const [t,h]=SCREENS[k];$('asTitle').textContent=t;$('asBody').innerHTML=h();setAsHead('x')}
+  paintIcons(asc);asc.classList.add('on');asc.dataset.k=k;wireFinance();wireTop(k);
 }
+// a sub-page inside the account screen, with Back to its parent screen
+function openSub(k,title,html,back){
+  panelOwner='top';
+  $('asTitle').textContent=title;$('asBody').innerHTML=html;asc.dataset.k=k;
+  setAsHead('back',back);asc.classList.add('on');twrap.classList.add('open','screen');catcher.classList.add('on');
+  paintIcons(asc);asc.querySelector('.aspanel').scrollTop=0;
+}
+function wireTop(k){
+  if(k==='Profile'){const b=$('asEditProf');if(b)b.onclick=e=>{e.stopPropagation();openEditProfile()}}
+  if(k==='Notifications')asc.querySelectorAll('.nrow').forEach(b=>b.onclick=e=>{e.stopPropagation();const n=NOTIFS[+b.dataset.n];
+    if(n.go==='#editprofile'){openScreen('Profile');openEditProfile();return}
+    location.href=n.go+'&from='+encodeURIComponent(notifFrom())});
+  if(k==='Settings')asc.querySelectorAll('[data-set]').forEach(b=>b.onclick=e=>{e.stopPropagation();openSetting(b.dataset.set)});
+}
+// ---- edit profile
+window.openEditProfile=function openEditProfile(){
+  const sel=new Set(PROF.focuses);
+  openSub('EditProfile','Edit profile',`<div class="cform">
+    <div class="asprof aseditph"><div class="asav${PROF.photo?' ph':''}" id="epAv">${PROF.photo?'photo':'<i data-ic="user"></i>'}</div><button type="button" class="icbtn" id="epPhoto" aria-label="Change photo" data-tip="Photo" data-tip-side="r"><i data-ic="camera"></i></button></div>
+    <label class="cfield"><span>Name</span><input id="epName" maxlength="40" value="${esc(PROF.name)}"></label>
+    <label class="cfield"><span>Handle</span><input id="epHandle" maxlength="24" value="@${esc(PROF.handle)}" autocapitalize="off"></label>
+    <label class="cfield"><span>Bio <small>(optional)</small></span><textarea id="epBio" rows="3" maxlength="160">${esc(PROF.bio)}</textarea></label>
+    <div class="cfield"><span>Focuses</span><div class="tabs ftabs" id="epFoc">${FOCUSES.map(f=>`<span role="checkbox" tabindex="0" aria-checked="${sel.has(f)}" data-f="${f}"${sel.has(f)?' class="on"':''}>${f}</span>`).join('')}</div></div>
+    <p class="cerr" id="epErr" hidden></p>
+    <button type="button" class="asbtn pri wide" id="epSave">Save</button></div>`,()=>openScreen('Profile'));
+  let photo=PROF.photo;
+  $('epPhoto').onclick=e=>{e.stopPropagation();photo=!photo;const a=$('epAv');a.classList.toggle('ph',photo);a.innerHTML=photo?'photo':'<i data-ic="user"></i>';paintIcons(a)};
+  $('epFoc').querySelectorAll('[data-f]').forEach(c=>c.onclick=e=>{e.stopPropagation();const on=!c.classList.contains('on');c.classList.toggle('on',on);c.setAttribute('aria-checked',on)});
+  $('epSave').onclick=e=>{e.stopPropagation();
+    const name=$('epName').value.trim(),handle=$('epHandle').value.trim().replace(/^@/,'');
+    const foc=[...$('epFoc').querySelectorAll('.on')].map(c=>c.dataset.f);
+    const err=!name?'Please add your name.':!/^[a-z0-9_.]{3,24}$/i.test(handle)?'Handle: 3 to 24 letters, numbers, . or _':!foc.length?'Pick at least one focus.':'';
+    if(err){$('epErr').hidden=false;$('epErr').textContent=err;return}
+    Object.assign(PROF,{name,handle,bio:$('epBio').value.trim(),focuses:foc,photo});openScreen('Profile');window.toast&&toast('Profile saved')};
+};
+// ---- setting pages
+const tgl=(k,l,on,sub)=>`<label class="astgl"><span class="asl">${l}${sub?`<small>${sub}</small>`:''}</span><input type="checkbox" class="tgl" data-k="${k}"${on?' checked':''}></label>`;
+const pick=(name,opts,cur)=>`<div class="aspick" data-name="${name}">${opts.map(([v,sub])=>`<div class="opt${v===cur?' on':''}" role="radio" tabindex="0" aria-checked="${v===cur}" data-v="${v}"><span>${v}${sub?`<small>${sub}</small>`:''}</span><i class="ck" data-ic="check"></i></div>`).join('')}</div>`;
+window.openSetting=function openSetting(k){
+  const back=()=>openScreen('Settings');
+  if(k==='notifications'){
+    openSub('Set','Notifications',`<h5 class="ash5">In the app</h5><div class="astgls">${tgl('likes','Likes',SET.notif.likes)}${tgl('comments','Comments on my posts',SET.notif.comments)}${tgl('replies','Replies to my comments',SET.notif.replies)}${tgl('follows','New followers',SET.notif.follows)}${tgl('saves','Saves of my resources',SET.notif.saves)}${tgl('pods','Pod updates',SET.notif.pods)}</div>
+      <h5 class="ash5">Email</h5><div class="astgls">${tgl('weekly','Weekly summary',SET.notif.weekly,'One email each Sunday')}</div>`,back);
+    asc.querySelectorAll('.tgl').forEach(t=>t.onchange=()=>{SET.notif[t.dataset.k]=t.checked});
+  } else if(k==='language'){
+    openSub('Set','Language',pick('lang',[['English'],['Français'],['Español']],SET.lang)+'<p class="asnote">The app and emails use this language.</p>',back);
+  } else if(k==='theme'){
+    openSub('Set','Theme',pick('theme',[['Light'],['Dark'],['Device','Same as your phone or computer']],SET.theme),back);
+  } else if(k==='privacy'){
+    openSub('Set','Privacy',`<h5 class="ash5">Who can see my profile</h5>${pick('vis',[['Everyone'],['Members','People with an account'],['Only me']],SET.vis)}
+      <h5 class="ash5">Profile</h5><div class="astgls">${tgl('focuses','Show my focuses',SET.priv.focuses)}${tgl('follow','Let people follow me',SET.priv.follow)}${tgl('search','Show me in Community search',SET.priv.search)}</div>`,back);
+    asc.querySelectorAll('.tgl').forEach(t=>t.onchange=()=>{SET.priv[t.dataset.k]=t.checked});
+  } else if(k==='account'){
+    openSub('Set','Account',`<div class="askvs">${kv('Email','you@example.com')}${kv('Password','••••••••')}</div>
+      <div class="asbtns"><a class="asbtn aslinkbtn" id="asPw" href="reset-password.html?from=${encodeURIComponent(notifFrom().replace('open=notifications','open=settings&item=account'))}">Change password</a></div>
+      <a class="aslink" id="asLogout" href="login.html">Log out</a>`,back);
+  } else return;
+  asc.querySelectorAll('.aspick').forEach(g=>g.querySelectorAll('.opt').forEach(o=>o.onclick=e=>{e.stopPropagation();
+    g.querySelectorAll('.opt').forEach(x=>{x.classList.toggle('on',x===o);x.setAttribute('aria-checked',x===o)});
+    SET[g.dataset.name]=o.dataset.v}));
+  asc.querySelectorAll('.astgl').forEach(l=>l.addEventListener('click',e=>e.stopPropagation()));
+};
+// ---- cancel plan (from Member and plans)
+const LOSE=['AI guide','AI journal reflection','Bigger gift allowance','Progress tracking and post stats','Offline saves','More pods','Supporter badge'];
+window.openCancelPlan=function openCancelPlan(){
+  openSub('Cancel','Cancel plan',`<div class="askvs">${kv('Plan','Growth tools + AI · $15/mo')}${kv('Ends on','November 4, 2026')}</div>
+    <h5 class="ash5">You will lose</h5><div class="aslose">${LOSE.map(l=>`<div class="asprow lose"><i data-ic="x"></i>${l}</div>`).join('')}</div>
+    <p class="asnote">You keep everything until November 4, 2026. After that you are not charged again.</p>
+    <div class="asbtns"><button type="button" class="asbtn" id="asKeepPlan">Keep plan</button><button type="button" class="asbtn pri" id="asConfirmCancel">Cancel plan</button></div>`,()=>openScreen('Finance'));
+  $('asKeepPlan').onclick=e=>{e.stopPropagation();openScreen('Finance')};
+  $('asConfirmCancel').onclick=e=>{e.stopPropagation();window._finState='cancelled';openScreen('Finance','cancelled');window.toast&&toast('Plan cancelled')};
+};
 function cardHTML(){return `${EX}<div class="cform">
   <label class="cfield"><span>Name on card</span><input placeholder="Example Name" value="" autocomplete="cc-name"></label>
   <label class="cfield"><span>Card number</span><input inputmode="numeric" placeholder="•••• •••• •••• ••••" autocomplete="cc-number"></label>
@@ -174,9 +261,12 @@ function openCard(){
   $('asTitle').textContent='Credit card';$('asBody').innerHTML=cardHTML();
   asc.dataset.k='Card';setAsHead('back',()=>openScreen('Finance'));asc.classList.add('on');twrap.classList.add('open','screen');catcher.classList.add('on');
   paintIcons(asc);
-  $('asSaveCard').onclick=e=>{e.stopPropagation();window._finState='member';window.BILLING_DEMO='member';openScreen('Finance','member')};
+  const prev=window._finState;
+  $('asSaveCard').onclick=e=>{e.stopPropagation();const st=prev==='cancelled'?'cancelled':'member';window._finState=st;window.BILLING_DEMO=st;openScreen('Finance',st)};
 }
 function wireFinance(){if(asc.dataset.k!=='Finance')return;
+  const cn=$('asCancel');if(cn)cn.onclick=e=>{e.stopPropagation();openCancelPlan()};
+  const kp=$('asKeep');if(kp)kp.onclick=e=>{e.stopPropagation();window._finState='member';openScreen('Finance','member');window.toast&&toast('Your plan continues')};
   const add=asc.querySelector('.asaddcard');if(add)add.onclick=e=>{e.stopPropagation();openCard()};
   const card=asc.querySelector('.ascard');if(card)card.onclick=e=>{e.stopPropagation();openCard()};
 }
