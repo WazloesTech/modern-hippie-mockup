@@ -1,11 +1,11 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="mock3.css"></head><body>
 <main class="dpage">
-  <div class="dtop"><a class="icbtn" id="back" href="home7.html#feed" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Post</h1></div>
-  <div class="dop"><div class="dav"><i data-ic="user"></i></div><div><b>@wren</b><div class="dmeta" id="meta">2h · example post</div></div></div>
-  <div id="vwrap" class="dvsoon" hidden><div class="vtile pimg"><i data-ic="video"></i><span>Video coming soon</span></div></div>
+  <div class="dtop" id="dtop"><a class="icbtn" id="back" href="home7.html#feed" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Post</h1></div>
+  <div class="dop"><div class="dav"><i data-ic="user"></i></div><div><b id="by">@wren</b><div class="dmeta" id="meta">2h · example post</div></div></div>
+  <div id="vwrap" class="dvsoon" hidden><div class="vtile pimg"><i data-ic="video"></i><span>2:00</span></div></div>
   <div id="pwrap" class="dvsoon" hidden><div class="ph pimg">photo</div></div>
-  <p class="dbody" id="body">Example text post. This is the full post body. Comments nest below — reply to any comment, or open Continue thread when a branch gets deep.</p>
+  <p class="dbody" id="body"></p>
   <div class="dacts"><button type="button" class="icbtn tog" id="like" aria-label="Like"><i data-ic="thumbs-up"></i></button><button type="button" class="icbtn tog" id="save" aria-label="Save"><i data-ic="bookmark"></i></button></div>
   <p class="sect">Comments</p>
   <div class="cthread" id="thread"></div>
@@ -17,19 +17,28 @@
     <button type="button" id="send">Comment</button>
   </div>
 </div>
-<script src="icons3.js"></script><script src="comments3.js"></script><script>
+<script src="icons3.js"></script><script src="owner3.js"></script><script src="comments3.js"></script><script>
 const $=id=>document.getElementById(id);
 const P=new URLSearchParams(location.search);
-const T=P.get('t')||'Example written post: what worked for me this week';
+let T=P.get('t')||'What worked for me this week';
 const from=P.get('from')||'home7.html#feed';
+const by=P.get('by')||'@wren';
 const type=(P.get('type')||(P.get('video')==='1'?'video':'written')).toLowerCase();
-$('back').href=from;$('title').textContent=T;document.title=T;
-if(type==='video'){$('vwrap').hidden=false;$('meta').textContent='1h · video post · 12 comments'}
-else if(type==='photo'){$('pwrap').hidden=false;$('meta').textContent='2h · photo post · 5 comments'}
-else $('meta').textContent='5h · written post · 18 comments';
+const BODY={
+  video:'I do this every morning before work. Two minutes of slow stretching, three deep breaths, then a glass of water. Try it for a week and tell me how it feels.',
+  photo:'My balcony garden after one month. The basil is doing great, the tomatoes not so much. Any tips?',
+  written:'Three things helped me this week: going to bed at the same time, a short walk after lunch, and no phone in the bedroom. Small changes, but I feel calmer.'};
+$('back').href=from;$('title').textContent=T;document.title=T;$('by').textContent=by;
+$('body').textContent=BODY[type]||BODY.written;
+let comments=type==='video'?12:type==='photo'?5:18;
+const label=type==='video'?'video post':type==='photo'?'photo post':'written post';
+const ago=type==='video'?'1h':type==='photo'?'2h':'5h';
+const meta=()=>{$('meta').textContent=`${ago} · ${label} · ${comments} comments`};
+if(type==='video')$('vwrap').hidden=false;else if(type==='photo')$('pwrap').hidden=false;
+meta();
 const here=location.pathname.split('/').pop()+location.search;
 function draw(){
-  MHComments.render($('thread'),{postT:T,fromUrl:here});
+  MHComments.render($('thread'),{postT:T,fromUrl:here,hl:P.get('hl')});
 }
 paintIcons();
 draw();
@@ -37,4 +46,22 @@ const composer=document.querySelector('.dcomposer');
 composer._rerender=draw;
 MHComments.wire($('thread'),composer);
 document.querySelectorAll('.tog').forEach(b=>b.onclick=()=>b.classList.toggle('on'));
+// owner tools: only on your own posts
+if(by==='@you'){
+  const esc=MHOwner.esc;
+  window.MHPostMenu=MHOwner.menu($('dtop'),{
+    onEdit(){
+      MHOwner.form({title:'Edit post',id:'editPost',html:
+        `<label class="cfield"><span>Type</span><select disabled><option>${label[0].toUpperCase()+label.slice(1,-5)}</option></select></label>`+
+        `<label class="cfield"><span>Title</span><input id="ePostT" maxlength="120" value="${esc(T)}"></label>`+
+        `<label class="cfield"><span>Post</span><textarea id="ePostB" rows="5">${esc($('body').textContent)}</textarea></label>`,
+        onOk(){const t=$('ePostT').value.trim(),b=$('ePostB').value.trim();if(!t||!b)return false;
+          T=t;$('title').textContent=t;document.title=t;$('body').textContent=b;MHOwner.toast('Post updated')}});
+    },
+    onDelete(){
+      MHOwner.confirm({title:'Delete this post?',id:'delPost',ok:'Delete',
+        text:`This post and its ${comments} comments will be removed for everyone.`,note:'You can’t undo this.',
+        onOk(){MHOwner.flash('Post deleted',{k:'feed',t:T});location.href=from}});
+    }});
+}
 </script><script src="open3.js"></script></body></html>

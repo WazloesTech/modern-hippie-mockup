@@ -1,22 +1,45 @@
 <!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="mock3.css"></head><body>
 <main class="dpage">
-  <div class="dtop"><a class="icbtn" id="back" href="home7.html#res" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Resource</h1></div>
+  <div class="dtop" id="dtop"><a class="icbtn" id="back" href="home7.html#res" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Resource</h1></div>
   <div class="rtype" id="rtype"><i data-ic="bookmark"></i><span id="rtypeLab">Link</span></div>
   <p class="dmeta rsrc" id="src">example.com/beginner-guide</p>
   <p class="dbody" id="desc">A short guide for people who are just starting out. It covers the first steps and common mistakes.</p>
+  <p class="dmeta" id="by" hidden></p>
   <div class="dbtns"><button type="button" class="asbtn pri" id="open">Open</button><button type="button" class="icbtn tog" id="save" aria-label="Save" data-tip="Save"><i data-ic="bookmark"></i></button></div>
 </main>
-<script src="icons3.js"></script><script>
+<script src="icons3.js"></script><script src="owner3.js"></script><script>
 const $=id=>document.getElementById(id);
 const P=new URLSearchParams(location.search);
-const T=P.get('t')||'Example resource: a beginner guide';
-const typ=(P.get('type')||'link').toLowerCase();
+let T=P.get('t')||'A beginner guide';
+let typ=(P.get('type')||'link').toLowerCase();
 const from=P.get('from')||'home7.html#res';
+const by=P.get('by')||'';
 $('back').href=from;$('title').textContent=T;document.title=T;
-$('rtypeLab').textContent=typ==='file'?'File':'Link';
+const setType=()=>{$('rtypeLab').textContent=typ==='file'?'File':'Link'};
+setType();
 if(typ==='file'){$('src').textContent='recommended-book.pdf · 2.4 MB';$('desc').textContent='A book members often recommend. Easy to read in a weekend.'}
+if(by){$('by').hidden=false;$('by').textContent='Added by '+by+' · 3d'}
 paintIcons();
 $('open').onclick=()=>{$('open').classList.add('on');$('open').textContent='Opened'};
 $('save').onclick=()=>$('save').classList.toggle('on');
+if(by==='@you'){
+  const esc=MHOwner.esc;
+  MHOwner.menu($('dtop'),{
+    onEdit(){
+      MHOwner.form({title:'Edit resource',id:'editRes',html:
+        `<label class="cfield"><span>Title</span><input id="eResT" maxlength="120" value="${esc(T)}"></label>`+
+        `<label class="cfield"><span>Type</span><select id="eResK"><option value="link"${typ==='link'?' selected':''}>Link</option><option value="file"${typ==='file'?' selected':''}>File</option></select></label>`+
+        `<label class="cfield"><span>URL or file</span><input id="eResU" value="${esc($('src').textContent)}"></label>`+
+        `<label class="cfield"><span>Description <small>(optional)</small></span><textarea id="eResD" rows="3">${esc($('desc').textContent)}</textarea></label>`,
+        onOk(){const t=$('eResT').value.trim();if(!t)return false;
+          T=t;typ=$('eResK').value;$('title').textContent=t;document.title=t;setType();
+          $('src').textContent=$('eResU').value.trim();$('desc').textContent=$('eResD').value.trim();MHOwner.toast('Resource updated')}});
+    },
+    onDelete(){
+      MHOwner.confirm({title:'Delete this resource?',id:'delRes',ok:'Delete',
+        text:'It will be removed from Resources for everyone.',note:'You can’t undo this.',
+        onOk(){MHOwner.flash('Resource deleted',{k:'res',t:T});location.href=from}});
+    }});
+}
 </script><script src="open3.js"></script></body></html>
