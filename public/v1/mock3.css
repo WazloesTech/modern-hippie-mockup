@@ -9,11 +9,10 @@ button{font-family:inherit;color:#1c1a17;cursor:pointer}
 .ph{border-radius:10px;background:#ddd5c6;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8b8274;flex:none}
 
 /* nav + list (home & subtopic) */
-.nav{display:flex;justify-content:space-between;margin:0 8px 6px}
+.nav{display:flex;justify-content:space-between;margin:0 8px 20px}
 .nav button{width:60px;height:60px;border-radius:50%;border:1px solid #d9d2c3;background:none;display:flex;align-items:center;justify-content:center;color:#1c1a17}
 .nav button.on{background:#1c1a17;color:#f4f0e8;border-color:#1c1a17}
 .nav svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.label{text-align:center;font-size:15px;color:#7a7266;margin:12px 0 16px}
 section{display:none}section.on{display:block}
 .tabs{display:flex;gap:6px;margin:0 0 8px}
 .tabs span{font-size:13px;padding:4px 10px;border:1px solid #d9d2c3;border-radius:99px;color:#7a7266}

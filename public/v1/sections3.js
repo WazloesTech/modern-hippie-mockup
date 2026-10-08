@@ -145,7 +145,7 @@ main.addEventListener('click',e=>{
 main.addEventListener('click',e=>{const b=e.target.closest('.fsact button');if(b){e.stopPropagation();b.classList.toggle('on')}},true);
 let tt;function toast(t){let el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';el.className='toast';document.body.appendChild(el)}
  el.textContent=t;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),1800)}
-function show(s){cur=s;document.getElementById('toast')?.classList.remove('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==s));document.querySelectorAll('main section').forEach(x=>x.classList.toggle('on',x.id==s));document.getElementById('label').textContent=names[s];syncBody();if(window.onSectionChange)window.onSectionChange(s)}
+function show(s){cur=s;document.getElementById('toast')?.classList.remove('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==s));document.querySelectorAll('main section').forEach(x=>x.classList.toggle('on',x.id==s));syncBody();if(window.onSectionChange)window.onSectionChange(s)}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.s));
 const h=location.hash.slice(1);show(names[h]?h:'sub');
 window.showSection=show;
