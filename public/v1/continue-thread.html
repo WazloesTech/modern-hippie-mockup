@@ -12,7 +12,7 @@
     <button type="button" id="send">Reply</button>
   </div>
 </div>
-<script src="icons3.js"></script><script src="comments3.js"></script><script>
+<script src="icons3.js"></script><script src="owner3.js"></script><script src="comments3.js"></script><script>
 const $=id=>document.getElementById(id);
 const P=new URLSearchParams(location.search);
 const T=P.get('t')||'Example post';
@@ -30,4 +30,4 @@ draw();
 const composer=document.querySelector('.dcomposer');
 composer._rerender=draw;
 MHComments.wire($('thread'),composer,{defaultParent:cid});
-</script></body></html>
+</script><script src="open3.js"></script></body></html>

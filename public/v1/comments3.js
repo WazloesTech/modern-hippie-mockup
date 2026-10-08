@@ -6,17 +6,17 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 
 // Deep sample tree so Continue thread appears under the long branch
 const SAMPLE=[
-  {id:'c1',w:'@sage',m:'2h',t:'Placeholder reply — start with the basics and take it slow.',kids:[
-    {id:'c1a',w:'@juniper',m:'1h',t:'Another example reply with a tip from experience.',kids:[
-      {id:'c1a1',w:'@ash',m:'50m',t:'Short agreeing reply.',kids:[
-        {id:'c1a1a',w:'@wren',m:'40m',t:'Example nested reply — keep going one level deeper.',kids:[
-          {id:'c1a1a1',w:'@cedar',m:'35m',t:'Example reply at this level.',kids:[
-            {id:'c1a1a1a',w:'@moss',m:'30m',t:'Example reply — nesting is getting deep.',kids:[
-              {id:'c1a1a1a1',w:'@fern',m:'25m',t:'Example reply past the phone indent limit.',kids:[
-                {id:'c1a1a1a1a',w:'@river',m:'20m',t:'Example deep reply — open Continue thread to read more.',kids:[
-                  {id:'c1a1a1a1a1',w:'@sage',m:'15m',t:'Example reply on the continue page.',kids:[
-                    {id:'c1a1a1a1a1a',w:'@juniper',m:'10m',t:'Example nested reply on the continue branch.',kids:[
-                      {id:'c1a1a1a1a1a1',w:'@ash',m:'5m',t:'Example leaf reply.',kids:[]}
+  {id:'c1',w:'@sage',m:'2h',t:'Start with the basics and take it slow. Two minutes is enough at first.',kids:[
+    {id:'c1a',w:'@juniper',m:'1h',t:'Good tip. I set an alarm so I don’t forget.',kids:[
+      {id:'c1a1',w:'@ash',m:'50m',t:'An alarm works for me too.',kids:[
+        {id:'c1a1a',w:'@wren',m:'40m',t:'I put my mat next to the bed. Then I can’t skip it.',kids:[
+          {id:'c1a1a1',w:'@cedar',m:'35m',t:'Smart. Do you stretch before or after coffee?',kids:[
+            {id:'c1a1a1a',w:'@moss',m:'30m',t:'Before. Coffee is my reward.',kids:[
+              {id:'c1a1a1a1',w:'@fern',m:'25m',t:'Ha, same. It makes mornings easier.',kids:[
+                {id:'c1a1a1a1a',w:'@river',m:'20m',t:'Has anyone tried it in the evening instead?',kids:[
+                  {id:'c1a1a1a1a1',w:'@sage',m:'15m',t:'Yes. It helps me sleep, but I go slower.',kids:[
+                    {id:'c1a1a1a1a1a',w:'@juniper',m:'10m',t:'Good to know. I will try it tonight.',kids:[
+                      {id:'c1a1a1a1a1a1',w:'@ash',m:'5m',t:'Let us know how it goes.',kids:[]}
                     ]}
                   ]}
                 ]}
@@ -27,13 +27,16 @@ const SAMPLE=[
       ]}
     ]}
   ]},
-  {id:'c2',w:'@ash',m:'1h',t:'Short agreeing reply.',kids:[
-    {id:'c2a',w:'@wren',m:'45m',t:'Example follow-up under this comment.',kids:[]}
+  {id:'c4',w:'@you',m:'30m',t:'I tried this for a week. The breathing part helps me the most.',kids:[
+    {id:'c4a',w:'@moss',m:'20m',t:'Same for me. I do it before bed too.',kids:[]}
   ]},
-  {id:'c3',w:'@cedar',m:'40m',t:'Example comment with no replies yet.',kids:[]}
+  {id:'c2',w:'@ash',m:'1h',t:'Thanks for sharing. Saving this.',kids:[
+    {id:'c2a',w:'@wren',m:'45m',t:'Me too. Starting tomorrow.',kids:[]}
+  ]},
+  {id:'c3',w:'@cedar',m:'40m',t:'How long until you felt a change?',kids:[]}
 ];
 
-function clone(n){return {id:n.id,w:n.w,m:n.m,t:n.t,kids:(n.kids||[]).map(clone)}}
+function clone(n){return {id:n.id,w:n.w,m:n.m,t:n.t,del:!!n.del,edited:!!n.edited,kids:(n.kids||[]).map(clone)}}
 let TREE=SAMPLE.map(clone);
 
 function findNode(list,id){
@@ -80,11 +83,14 @@ function nodeHTML(n,depth,opts){
       kidsHTML=`<div class="ckids">${kids.map(k=>nodeHTML(k,depth+1,opts)).join('')}</div>`;
     }
   }
-  return `<div class="cnode" data-id="${esc(n.id)}" data-depth="${depth}">
+  const mine=n.w==='@you'&&!n.del;
+  const id=esc(n.id);
+  const acts=n.del?'':`<div class="cacts"><button type="button" class="creply" data-reply="${id}">Reply</button>${mine?`<span class="comenu"><button type="button" class="icbtn cedit" data-c="${id}" aria-label="Edit" data-tip="Edit" data-tip-side="b" hidden><i data-ic="pencil"></i></button><button type="button" class="icbtn cdel" data-c="${id}" aria-label="Delete" data-tip="Delete" data-tip-side="b" hidden><i data-ic="trash-2"></i></button><button type="button" class="icbtn cmore" data-c="${id}" aria-label="More" aria-expanded="false" data-tip="More" data-tip-side="b"><i data-ic="ellipsis"></i></button></span>`:''}</div>`;
+  return `<div class="cnode${n.del?' cgone':''}${opts.hl===n.id?' hl':''}" data-id="${id}" data-depth="${depth}">
     <div class="cmain">
-      <b>${esc(n.w)}</b><span class="dmeta">${esc(n.m)}</span>
-      <p class="cbody">${esc(n.t)}</p>
-      <button type="button" class="creply" data-reply="${esc(n.id)}">Reply</button>
+      <b>${n.del?'[deleted]':esc(n.w)}</b><span class="dmeta">${esc(n.m)}${n.edited&&!n.del?' · edited':''}</span>
+      <p class="cbody">${n.del?'[deleted]':esc(n.t)}</p>
+      ${acts}
     </div>
     ${kidsHTML}
   </div>`;
@@ -111,6 +117,13 @@ window.MHComments={
     const p=findNode(TREE,parentId);
     if(!p){TREE.push(node);return node}
     p.kids=p.kids||[];p.kids.push(node);return node;
+  },
+  edit(id,text){const n=findNode(TREE,id);const v=(text||'').trim();if(!n||!v)return null;n.t=v;n.edited=true;return n},
+  // Reddit-style: a deleted comment with replies stays as [deleted]; without replies it goes away
+  remove(id){
+    const n=findNode(TREE,id);if(!n)return;
+    if((n.kids||[]).length){n.del=true;n.t='[deleted]';return 'kept'}
+    const p=parentOf(TREE,id);const list=p?p.kids:TREE;const i=list.findIndex(k=>k.id===id);if(i>=0)list.splice(i,1);return 'gone';
   },
   // subtree rooted at cid (the continue-thread root comment itself)
   branch(cid){
@@ -143,17 +156,44 @@ window.MHComments={
       if(input)input.placeholder=(replyTo&&opts._picked)?'Write a reply':(opts.defaultParent?'Write a reply':'Write a comment');
       if(btn)btn.textContent=(replyTo&&opts._picked)||opts.defaultParent?'Reply':'Comment';
     };
+    let editing=null;
+    const closeMenus=except=>mount.querySelectorAll('.comenu').forEach(m=>{if(m===except)return;m.querySelectorAll('.cedit,.cdel').forEach(x=>x.hidden=true);const mm=m.querySelector('.cmore');mm.classList.remove('on');mm.setAttribute('aria-expanded','false')});
+    const startEdit=id=>{
+      const n=findNode(TREE,id);if(!n)return;
+      editing=id;replyTo=opts.defaultParent||null;opts._picked=false;
+      if(input){input.value=n.t;input.placeholder='Edit your comment'}
+      if(btn)btn.textContent='Save';
+      if(hint){hint.hidden=false;hint.textContent='Editing your comment'}
+      input&&input.focus();
+    };
+    const askDelete=id=>{
+      const n=findNode(TREE,id);if(!n)return;
+      const has=(n.kids||[]).length;
+      const done=()=>{MHComments.remove(id);if(editing===id){editing=null;if(input)input.value='';setHint()}if(composer._rerender)composer._rerender();window.toast&&toast('Comment deleted')};
+      if(window.MHOwner)MHOwner.confirm({title:'Delete this comment?',id:'delComment',ok:'Delete',
+        text:has?'Your comment will show as [deleted]. The replies under it will stay.':'Your comment will be removed.',
+        note:'You can’t undo this.',onOk:done});
+      else done();
+    };
     mount.addEventListener('click',e=>{
+      const m=e.target.closest('.cmore');
+      if(m){const wrap=m.closest('.comenu'),open=m.getAttribute('aria-expanded')!=='true';closeMenus(wrap);
+        wrap.querySelectorAll('.cedit,.cdel').forEach(x=>x.hidden=!open);m.classList.toggle('on',open);m.setAttribute('aria-expanded',open);return}
+      const ed=e.target.closest('.cedit');if(ed){closeMenus();startEdit(ed.dataset.c);return}
+      const dl=e.target.closest('.cdel');if(dl){closeMenus();askDelete(dl.dataset.c);return}
       const b=e.target.closest('.creply');if(!b)return;
+      editing=null;if(input)input.value='';
       replyTo=b.dataset.reply;opts._picked=true;setHint();input&&input.focus();
     });
     btn&&(btn.onclick=()=>{
       const v=(input&&input.value||'').trim();if(!v)return;
-      MHComments.addReply(replyTo,v);
+      if(editing){MHComments.edit(editing,v);editing=null}
+      else MHComments.addReply(replyTo,v);
       if(input)input.value='';
       replyTo=opts.defaultParent||null;opts._picked=false;setHint();
       if(composer._rerender)composer._rerender();
     });
+    composer._startEdit=startEdit;composer._askDelete=askDelete;
     setHint();
     return {getReplyTo:()=>replyTo,clearReply:()=>{replyTo=opts.defaultParent||null;opts._picked=false;setHint()}};
   }
