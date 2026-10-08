@@ -618,3 +618,63 @@ body[data-ctx="follow"] .titlebtn{/* subtle */}
 .dcomposerrow button{border:0;border-radius:99px;padding:10px 16px;background:#1c1a17;color:#f4f0e8;font:inherit;font-size:14px;flex:none}
 .creplyhint{font-size:12px;color:#8a6f4a;padding:0 4px}
 .creplyhint[hidden]{display:none !important}
+
+/* ===== v28: owner menus, edit/delete, settings pages, pods, app login ===== */
+.icbtn[hidden],.oact[hidden]{display:none !important}
+.omenu{display:flex;gap:6px;flex:none}
+.iacts{display:flex;gap:8px;flex:none}
+.omenu .icbtn,.iacts .icbtn,.comenu .icbtn,.aseditph .icbtn{position:relative}
+/* comment actions */
+.cacts{display:flex;align-items:center;gap:10px;min-height:26px}
+.comenu{display:inline-flex;align-items:center;gap:6px}
+.comenu .icbtn{width:26px;height:26px}
+.comenu .icbtn [data-ic]{width:13px;height:13px}
+.cnode.hl > .cmain{background:rgba(138,111,74,.16);margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:10px}
+.cnode.cgone > .cmain b,.cnode.cgone > .cmain .cbody{color:#a59a88}
+/* chips you can tap: Community tabs + profile focuses */
+.ctabs span,.ftabs span{cursor:pointer;-webkit-user-select:none;user-select:none}
+.ftabs{flex-wrap:wrap;gap:8px;margin:2px 0 0}
+.ftabs span{font-size:14px;padding:6px 12px;text-shadow:none}
+/* profile */
+.asbio{font-size:14px;color:#3d3830;margin:-8px 2px 10px}
+.asfoc{margin:0 0 16px}
+.asav.ph{font-size:11px}
+.aseditph{gap:12px;margin:0 0 4px}
+/* settings pages */
+.astgls{border-top:1px solid rgba(28,26,23,.14)}
+.astgl{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid rgba(28,26,23,.14);font-size:16px;cursor:pointer}
+.astgl small,.opt small{display:block;font-size:12px;color:#7a7266;margin-top:2px}
+.tgl{-webkit-appearance:none;appearance:none;width:44px;height:26px;border-radius:99px;background:rgba(28,26,23,.18);position:relative;margin:0;flex:none;cursor:pointer;transition:background .15s}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#f4f0e8;box-shadow:0 1px 3px rgba(28,26,23,.25);transition:left .15s}
+.tgl:checked{background:#1c1a17}
+.tgl:checked::after{left:21px}
+.aspick{border-bottom:1px solid rgba(28,26,23,.12)}
+.aspick .opt{font-size:16px}
+a.aslink{text-align:center}
+.aslinkbtn{display:block;text-align:center;text-decoration:none;color:#1c1a17}
+.asprow.lose [data-ic]{color:#9a4a3c}
+.aslose{margin:0 0 6px}
+/* app log in / sign up (lo-fi copy of modernhippie.com/login) */
+main.auth{max-width:380px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:32px 20px}
+.authhead{text-align:center;margin:0 0 26px}
+.authhead h1{font-weight:400;font-size:30px;margin:0 0 6px}
+.authhead p{margin:0;font-size:15px;color:#7a7266;line-height:1.45}
+.auth .cform{gap:16px}
+.flab{display:flex;justify-content:space-between;align-items:baseline}
+.flab a,.authfoot a,.authback{color:#8a6f4a}
+.cin{position:relative;display:block}
+.cin [data-ic]{position:absolute;left:13px;top:50%;width:18px;height:18px;transform:translateY(-50%);color:#a59a88;pointer-events:none}
+.cin input{width:100%;padding-left:42px}
+.author{display:flex;align-items:center;gap:10px;margin:22px 0 14px;font-size:13px;color:#7a7266}
+.author::before,.author::after{content:"";flex:1;height:1px;background:rgba(28,26,23,.18)}
+.authalt{display:flex;flex-direction:column;gap:10px}
+.authfoot{text-align:center;font-size:14px;color:#7a7266;margin:22px 0 0}
+.authback{display:block;text-align:center;font-size:14px;margin:18px 0 0}
+.authtop{position:absolute;top:16px;left:18px}
+main.auth[hidden]{display:none}
+.pimg > [data-ic]{width:40px;height:40px;color:#8b8274}
+/* avatar circles in rows: keep the icon small (people, pods, pod members) */
+.row .ph.phav{width:44px;height:44px}
+.phav [data-ic]{width:20px;height:20px;color:#8b8274}
+.row .rinfo .meta{display:block;font-size:12px;color:#a59a88;margin:0 0 6px}
+.row .rinfo b:has(+ .meta){margin-bottom:2px}
