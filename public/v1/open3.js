@@ -3,7 +3,10 @@
 //   home7 / subtopic3: info, report, path, menu, create (&type=sub|feed|res, &info=1), tools, search (&q=),
 //     sort (&dd=1), view, vote, context, top, profile, notifications, settings, finance (&bill=none|member),
 //     card (&bill=none|member)
-//   feed-detail: reply · people-detail: follow · resource-detail: open
+//     editprofile, cancel (Finance > Cancel plan), settings (&item=notifications|language|theme|privacy|account),
+//     sedit / sdel (edit / delete this subtopic from its info card)
+//   feed-detail: reply, more, edit, delete, cmenu / cedit / cdel / cgone (&cid=), &hl=<cid> highlights a comment
+//   people-detail: follow · resource-detail: open, more, edit, delete · pod-detail: join
 // &flowmap=1 = shown inside the flow map: no focus stealing, no animations.
 (function(){
 const P=new URLSearchParams(location.search);
@@ -26,12 +29,14 @@ if(P.get('flowmap')==='1'){
     }
   };
 }
+if(P.get('hl'))addEventListener('load',()=>setTimeout(()=>{const n=document.querySelector('.cnode.hl');if(n&&window.MHOwner)MHOwner.reveal(n,200)},60));
 if(!open)return;
 const $=id=>document.getElementById(id);
 const click=el=>{if(el)el.click()};
 const later=(fn,ms)=>setTimeout(fn,ms||60);
 const screens={profile:'Profile',notifications:'Notifications',settings:'Settings'};
 function run(){
+  if(open==='settings'&&P.get('item')&&window.openScreen){openScreen('Settings');return window.openSetting&&openSetting(P.get('item'))}
   if(screens[open]&&window.openScreen)return openScreen(screens[open]);
   switch(open){
     case 'info':return click($('tbtn'));
@@ -59,6 +64,24 @@ function run(){
     case 'finance':return window.openScreen&&openScreen('Finance',P.get('bill')||undefined);
     case 'card':if(window.openScreen){openScreen('Finance',P.get('bill')||undefined);openScreen('Card')}return;
     case 'reply':return click(document.querySelector('.creply[data-reply="'+(P.get('cid')||'c1a')+'"]'));
+    case 'more':return click($('oMore'));
+    case 'edit':return click($('oEdit'));
+    case 'delete':return click($('oDel'));
+    case 'cmenu':case 'cedit':case 'cdel':{
+      const id=P.get('cid')||'c4',m=document.querySelector('.cmore[data-c="'+id+'"]');
+      if(window.MHOwner)MHOwner.reveal(m&&m.closest('.cnode'),open==='cmenu'?260:200);
+      click(m);if(open==='cedit')click(document.querySelector('.cedit[data-c="'+id+'"]'));if(open==='cdel')click(document.querySelector('.cdel[data-c="'+id+'"]'));return;
+    }
+    case 'cgone':{
+      const id=P.get('cid')||'c4',c=document.querySelector('.dcomposer');
+      if(window.MHComments){MHComments.remove(id);c&&c._rerender&&c._rerender()}
+      if(window.MHOwner)MHOwner.reveal(document.querySelector('.cnode[data-id="'+id+'"]'),260);return;
+    }
+    case 'editprofile':if(window.openScreen){openScreen('Profile');window.openEditProfile&&openEditProfile()}return;
+    case 'cancel':if(window.openScreen){openScreen('Finance','member');window.openCancelPlan&&openCancelPlan()}return;
+    case 'sedit':click($('tbtn'));return click($('sEditBtn'));
+    case 'sdel':click($('tbtn'));return click($('sDelBtn'));
+    case 'join':return click($('join'));
     case 'follow':return click($('follow'));
     case 'open':return click($('open'));
   }
