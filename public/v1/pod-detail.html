@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="home7.html?tab=pods#people" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Pod</h1></div>
+  <div class="pprof">
+    <div class="dav big"><i data-ic="users"></i></div>
+    <b id="name">Morning movers</b>
+    <div class="chips" id="chips"></div>
+    <p class="dbody" id="about">A small group that meets online each week.</p>
+    <button type="button" class="asbtn pri" id="join">Join</button>
+  </div>
+  <p class="sect">Members</p>
+  <div id="members"></div>
+</main>
+<script src="icons3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'Morning movers';
+const n=Math.max(1,parseInt(P.get('n')||'8',10));
+const focus=P.get('f')||'Body';
+const from=P.get('from')||'home7.html?tab=pods#people';
+$('back').href=from;$('title').textContent=T;$('name').textContent=T;document.title=T;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let count=n;
+const chips=()=>{$('chips').innerHTML=`<span>${count} members</span><span>${esc(focus)}</span>`};
+chips();
+const FOLKS=['@sage','@river','@juniper','@ash','@wren','@cedar','@moss','@fern','@birch','@clover','@hazel','@rowan'];
+const META=['Host · Joined 1y','Member · Joined 8mo','Member · Joined 6mo','Member · Joined 4mo','Member · Joined 3mo','Member · Joined 2mo','Member · Joined 5w','Member · Joined 3w','Member · Joined 2w','Member · Joined 1w','Member · Joined 4d','Member · Joined 1d'];
+const here=location.pathname.split('/').pop()+location.search;
+function drawMembers(){
+  const list=FOLKS.slice(0,Math.min(n,FOLKS.length)).map((h,i)=>({h,m:META[i]}));
+  if(count>n)list.push({h:'@you',m:'Member · Joined just now'});
+  $('members').innerHTML=list.map(x=>x.h==='@you'
+    ?`<div class="row"><div class="ph phav"><i data-ic="user"></i></div><div class="rinfo"><b>${x.h}</b><span class="meta">${x.m}</span></div></div>`
+    :`<a class="row" href="people-detail.html?t=${encodeURIComponent(x.h)}&from=${encodeURIComponent(here)}"><div class="ph phav"><i data-ic="user"></i></div><div class="rinfo"><b>${x.h}</b><span class="meta">${x.m}</span></div></a>`).join('');
+  paintIcons($('members'));
+}
+drawMembers();paintIcons();
+$('join').onclick=()=>{
+  const on=$('join').classList.toggle('on');
+  $('join').textContent=on?'Joined':'Join';count=n+(on?1:0);chips();drawMembers();
+};
+</script><script src="open3.js"></script></body></html>
