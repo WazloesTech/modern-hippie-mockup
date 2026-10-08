@@ -9,11 +9,11 @@
 const $=id=>document.getElementById(id);
 const T=new URLSearchParams(location.search).get('t')||'Mind';$('crumb').textContent=T;
 const F=new URLSearchParams(location.search).get('from')||('subtopic3.html?t='+encodeURIComponent(T));$('back').href=F+'#info';
-const C=[{w:'@river',n:31,t:'Placeholder description A. This is the full, longer description of the topic. It covers what the topic is about, who it is for, and why it matters. It can run several paragraphs.<br><br>Second paragraph of placeholder text. Real wording will come from the community, and the version with the most votes is shown as the description.'},
-{w:'@sage',n:12,t:'Placeholder description B. A shorter alternative summary of the topic written by another member.'},
-{w:'@juniper',n:44,t:'Placeholder description C. A different take on the same topic, with its own focus and tone. Example text only.<br><br>It continues with a second short paragraph of placeholder text.'},
-{w:'@ash',n:3,t:'Placeholder description D. One sentence example.'},
-{w:'@wren',n:19,t:'Placeholder description E. Another alternative description, kept to a couple of lines of example text.'}];C.forEach(c=>c.v=0);
+const C=[{w:'@river',n:31,t:'This topic is about small, daily habits that help you feel well in body and mind. It is for anyone who wants to start slowly, without big changes or expensive tools.<br><br>Start with the top subtopics. Each one has short guides, real stories from members, and a place to ask questions.'},
+{w:'@sage',n:12,t:'Simple steps for a calmer, healthier life. Pick one idea, try it for a week, and share how it went.'},
+{w:'@juniper',n:44,t:'A friendly place to learn from people who have been where you are. No experts needed, just honest tips that worked for someone.<br><br>Members vote, so the most helpful ideas rise to the top.'},
+{w:'@ash',n:3,t:'Small changes, done every day.'},
+{w:'@wren',n:19,t:'Guides, stories and questions about living well. Good for beginners and for people coming back after a break.'}];C.forEach(c=>c.v=0);
 const row=c=>`<div class="body">${c.m?'<span class="tagmain">Current description</span><br>':''}<span class="clip">${c.t.replace(/(<br>)+/g," ")}</span><span class="who">by ${c.w}</span></div>`;const showCur=c=>{$('mainTxt').innerHTML=c.t;$('mainBy').textContent='Current description · by '+c.w+' · '+c.n+' votes'};
 function draw(){C.sort((a,b)=>b.n-a.n);C.forEach((c,i)=>c.m=i==0);showCur(C[0]);
 $('list').innerHTML=C.map((c,i)=>`<div class="cand">${row(c)}<div class="votes"><button class="${c.v>0?'on':''}" data-i="${i}" data-d="1" aria-label="Vote up"><i data-ic="chevron-up"></i></button><b>${c.n}</b><button class="${c.v<0?'on':''}" data-i="${i}" data-d="-1" aria-label="Vote down"><i data-ic="chevron-down"></i></button></div></div>`).join('');paintIcons($('list'))}

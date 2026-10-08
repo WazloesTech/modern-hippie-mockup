@@ -4,9 +4,9 @@
 function initTopic(opt){
 const T=opt.title;
 document.body.insertAdjacentHTML('beforeend',`<div class="pop" id="info"><div class="card" role="dialog" aria-label="Topic info">
-  <div class="ihead"><div class="ititle" id="it">Mind</div><button class="icbtn" id="flagBtn" aria-label="Report"><i data-ic="flag"></i></button></div>
+  <div class="ihead"><div class="ititle" id="it">Mind</div><div class="iacts"><button class="icbtn" id="sEditBtn" aria-label="Edit" data-tip="Edit" data-tip-side="b" hidden><i data-ic="pencil"></i></button><button class="icbtn" id="sDelBtn" aria-label="Delete" data-tip="Delete" data-tip-side="b" hidden><i data-ic="trash-2"></i></button><button class="icbtn" id="flagBtn" aria-label="Report" data-tip="Report" data-tip-side="b"><i data-ic="flag"></i></button></div></div>
   <div class="ibody"><button class="ph" id="img" aria-label="Open images">image</button>
-  <p>Example description of this topic. This is placeholder text that stands in for the real community-written summary. It explains what the topic covers, who it is for, and why it matters, in a few short sentences that wrap around the image. <a href="#" id="more">See more</a></p></div>
+  <p id="idesc">What this topic covers, who it is for, and why it matters. Members write this summary together and vote for the best version. Start with the top subtopics, then ask questions in the feed. <a href="#" id="more">See more</a></p></div>
   <div class="acts"><button class="icbtn tog" data-g="ld" aria-label="Like"><i data-ic="thumbs-up"></i></button><button class="icbtn tog" data-g="ld" aria-label="Dislike"><i data-ic="thumbs-down"></i></button><button class="icbtn tog" aria-label="Save"><i data-ic="bookmark"></i></button></div>
   <div class="lab">Difficulty <span id="dv"></span></div>
   <div class="bars" id="bars"></div>
@@ -25,7 +25,7 @@ document.body.insertAdjacentHTML('beforeend',`<div class="pop" id="info"><div cl
   <label class="radio"><input type="radio" name="why" value="Spam">Spam</label><label class="radio"><input type="radio" name="why" value="Harassment or bullying">Harassment or bullying</label><label class="radio"><input type="radio" name="why" value="Hate speech">Hate speech</label><label class="radio"><input type="radio" name="why" value="Violence or dangerous content">Violence or dangerous content</label><label class="radio"><input type="radio" name="why" value="Sexual or explicit content">Sexual or explicit content</label><label class="radio"><input type="radio" name="why" value="Misinformation">Misinformation</label><label class="radio"><input type="radio" name="why" value="Illegal content">Illegal content</label><label class="radio"><input type="radio" name="why" value="Off-topic or wrong place">Off-topic or wrong place</label><label class="radio"><input type="radio" name="why" value="Other">Other</label>
   <textarea id="other" placeholder="Tell us more"></textarea>
   <div class="btns"><button id="rCancel">Cancel</button><button class="pri" id="rSend" disabled>Report</button></div></div>
-  <div id="rdone" style="display:none"><h3>Thanks</h3><p class="sent">Your report was sent (placeholder).</p><div class="btns"><button class="pri" id="rOk">OK</button></div></div>
+  <div id="rdone" style="display:none"><h3>Thanks</h3><p class="sent">Your report was sent. Our team will review it.</p><div class="btns"><button class="pri" id="rOk">OK</button></div></div>
 </div></div>`);
 if(window.paintIcons)paintIcons();
 const $=id=>document.getElementById(id);
@@ -63,6 +63,27 @@ rp.querySelectorAll('input[name=why]').forEach(r=>r.onchange=()=>{$('rSend').dis
 const closeR=()=>{rp.classList.remove('on');rp.querySelectorAll('input').forEach(x=>x.checked=false);$('other').classList.remove('on');$('rSend').disabled=true};
 $('rCancel').onclick=closeR;$('rOk').onclick=closeR;rp.addEventListener('click',e=>{if(e.target.id=='report')closeR()});
 $('rSend').onclick=()=>{$('rform').style.display='none';$('rdone').style.display=''};
+// edit / delete this subtopic (not the home page or the six focuses)
+const path=()=>window.TOPIC_PATH||['Modern Hippie'];
+const canEdit=()=>path().length>2;
+$('sEditBtn').hidden=$('sDelBtn').hidden=!canEdit();
+const escH=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('sEditBtn').onclick=()=>{if(!window.MHOwner)return;
+  const cur=path()[path().length-1];
+  MHOwner.form({title:'Edit subtopic',id:'editSub',html:
+    `<label class="cfield"><span>Name</span><input id="eSubN" maxlength="60" value="${escH(cur)}"></label>`+
+    `<label class="cfield"><span>Short description</span><textarea id="eSubD" rows="4">${escH($('idesc').firstChild.textContent.trim())}</textarea></label>`,
+    onOk(){const v=$('eSubN').value.trim();if(!v)return false;
+      const p=path();p[p.length-1]=v;$('tt').textContent=v;$('it').textContent=v;document.title=v;fit();fitTitle();
+      $('idesc').firstChild.textContent=$('eSubD').value.trim()+' ';MHOwner.toast('Subtopic updated')}});
+};
+$('sDelBtn').onclick=()=>{if(!window.MHOwner)return;
+  const p=path(),cur=p[p.length-1],parent=p[p.length-2],kids=(window.SUB_ITEMS||[]).length;
+  MHOwner.confirm({title:'Delete “'+cur+'”?',id:'delSub',ok:'Delete',
+    text:kids?`Its ${kids} subtopics will move up to <b>${escH(parent)}</b>. They are not deleted.`:`It has no subtopics. You will go back to <b>${escH(parent)}</b>.`,
+    note:'You can’t undo this.',
+    onOk(){MHOwner.flash(kids?`${cur} deleted. Its subtopics moved to ${parent}.`:`${cur} deleted.`);location.href=window.parentHref||'home7.html'}});
+};
 fit();
 if(location.hash=='#info')openInfo();
 if(location.hash=='#report'){openInfo();$('flagBtn').click()}
