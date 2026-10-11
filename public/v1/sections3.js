@@ -43,19 +43,23 @@ const DATA={sub:subs,
  people:FOLKS.map((h,i)=>({t:h,meta:PEOPLE_META[i],tag:'',text:BIOS[i],chips:PEOPLE_CHIPS[i],kind:'person',type:undefined,video:false})),
  res:mk('res',[['Example resource: a beginner guide','Article · 8 min read',,'link','@you'],['Example resource: a recommended book','Book · 240 pages',,'file'],['Example resource: a short video course','Video · 45 min',,'link'],['Example resource: a printable checklist','PDF · 2 pages',,'file']])};
 const GLOBAL_TAKEN=['Modern Hippie','Body','Mind','Soul','Business','Family','Community','Focus and attention','Sleep','Learning new skills','Calm under stress','Habits','Running','Fitness'];
-const CTX_ID=(()=>{const q=new URLSearchParams(location.search).get('ctx');if(q&&['mh','follow','personal'].includes(q))return q;try{const s=sessionStorage.getItem('mh.context');if(s&&['mh','follow','personal'].includes(s))return s}catch(e){}return window.MH_CONTEXT||'mh'})();
+const CTX_OK=c=>['mh','follow','personal'].includes(c)||(c==='founders'&&window.MH_IS_FOUNDER);
+const CTX_ID=(()=>{const q=new URLSearchParams(location.search).get('ctx');if(q&&CTX_OK(q))return q;try{const s=sessionStorage.getItem('mh.context');if(s&&CTX_OK(s))return s}catch(e){}return window.MH_CONTEXT||'mh'})();
 window.MH_CONTEXT=window.MH_CONTEXT||CTX_ID;
 function flavorChips(base,i){
+  if(CTX_ID==='founders')return ['Founders'].concat((base||[]).slice(0,1));
   if(CTX_ID==='follow')return ['From '+FOLKS[i%FOLKS.length],'Following'].concat((base||[]).slice(0,1));
   if(CTX_ID==='personal')return [i%2?'Saved':'Created by you'].concat((base||[]).filter(c=>!/members/i.test(c)).slice(0,2));
   return base||[];
 }
 function flavorTag(tag,i){
+  if(CTX_ID==='founders')return 'founders only';
   if(CTX_ID==='follow')return 'from '+FOLKS[i%FOLKS.length];
   if(CTX_ID==='personal')return i%2?'saved by you':'created by you';
   return tag;
 }
 function flavorMeta(meta,i){
+  if(CTX_ID==='founders')return (meta||'')+' · founders';
   if(CTX_ID==='follow')return (meta||'')+' · following';
   if(CTX_ID==='personal')return (meta||'')+' · yours';
   return meta;
@@ -63,6 +67,16 @@ function flavorMeta(meta,i){
 DATA.sub=DATA.sub.map((x,i)=>({...x,chips:flavorChips(x.chips,i)}));
 ['feed','people','res'].forEach(k=>{DATA[k]=DATA[k].map((x,i)=>({...x,tag:flavorTag(x.tag,i),meta:flavorMeta(x.meta,i),chips:flavorChips(x.chips,i)}))});
 EVENTS=EVENTS.map((x,i)=>({...x,tag:flavorTag(x.tag,i),meta:flavorMeta(eventMeta(x),i),chips:flavorChips(x.chips,i)}));
+if(CTX_ID==='founders'){
+  const FF=['Founders check-in: what we are building next','Gratitude thread for this week','Planning the next community gathering','A question for other founders','Sharing what worked in my pod'];
+  DATA.feed=DATA.feed.map((x,i)=>({...x,t:FF[i%FF.length]}));
+}
+function syncFoundersCue(){
+  let el=document.getElementById('foundersCue');
+  if(CTX_ID!=='founders'){if(el)el.remove();return}
+  if(!el){el=document.createElement('p');el.id='foundersCue';el.className='asnote';el.style.cssText='margin:0 0 8px;text-align:center';document.querySelector('.nav')?.insertAdjacentElement('afterend',el)}
+  el.textContent='Private to founders';
+}
 const key=k=>'mh.view.'+k;
 // ?view=list|compact|post sets the view for this page load only (used by the flow map); nothing is saved
 let VQ=new URLSearchParams(location.search).get('view');if(!['list','compact','post'].includes(VQ))VQ=null;
@@ -177,6 +191,7 @@ let tt;function toast(t){let el=document.getElementById('toast');if(!el){el=docu
 function show(s){cur=s;document.getElementById('toast')?.classList.remove('on');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.s==s));document.querySelectorAll('main section').forEach(x=>x.classList.toggle('on',x.id==s));syncBody();if(window.onSectionChange)window.onSectionChange(s)}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>show(b.dataset.s));
 const h=location.hash.slice(1);show(names[h]?h:'sub');
+syncFoundersCue();
 // a section hash (#feed, #people…) should not scroll the page down to the section
 if(names[h])addEventListener('load',()=>{if(scrollY>0)scrollTo(0,0)});
 // one-time message from the page before (e.g. "Post deleted"): remove that item here too

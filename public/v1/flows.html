@@ -200,7 +200,8 @@ const FLOWS=[
    n('fmember','Member and plans','home7.html?open=finance&bill=member',[3,0]),
    n('fupd','Update card','home7.html?open=card&bill=member',[4,0]),
    n('fcancel','Cancel plan','home7.html?open=cancel',[4,1],'fmember'),
-   n('fended','Plan ends','home7.html?open=finance&bill=cancelled',[5,1])]},
+   n('fended','Plan ends','home7.html?open=finance&bill=cancelled',[5,1]),
+   n('ftiers','Founder tiers','home7.html?open=finance&bill=member',[3,1],'fmember')]},
  {k:'settings',t:'Settings',nodes:[
    n('stop','Menu','home7.html?open=top',[0,0],[]),
    n('set','Settings','home7.html?open=settings',[1,0]),
@@ -218,7 +219,10 @@ const FLOWS=[
    n('cfpick','Switch','home7.html?ctx=follow&open=context',[3,0]),
    n('cpers','Personal','home7.html?ctx=personal',[4,0]),
    n('cpfeed','Personal feed','home7.html?ctx=personal#feed',[5,0]),
-   n('cffeed','Follow feed','home7.html?ctx=follow#feed',[3,1],'cfollow')]}
+   n('cffeed','Follow feed','home7.html?ctx=follow#feed',[3,1],'cfollow'),
+   n('cfounders','Founders','home7.html?ctx=founders',[6,0]),
+   n('cfpickf','Switch','home7.html?ctx=founders&open=context',[7,0]),
+   n('cffound','Founders feed','home7.html?ctx=founders#feed',[6,1],'cfounders')]}
 ];
 
 // ---------- helpers ----------

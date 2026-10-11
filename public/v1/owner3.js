@@ -1,3 +1,5 @@
+// Demo account is a founder (set false to hide Founders context).
+window.MH_IS_FOUNDER=window.MH_IS_FOUNDER!==false;
 // Shared owner tools for detail pages: '…' owner menu (icon-only, hover labels on desktop),
 // frosted confirm / form pop-ups, and a one-time toast carried to the next page.
 (function(){

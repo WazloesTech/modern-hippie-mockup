@@ -572,7 +572,7 @@ body.fs-on{overflow:hidden}
 .cmini{position:fixed;left:20px;width:44px;height:44px;border-radius:50%;background:#f4f0e8;border:1px solid #d9d2c3;display:flex;align-items:center;justify-content:center;padding:0;z-index:40;box-shadow:0 4px 12px rgba(28,26,23,.12);opacity:0;transform:translateY(-16px) scale(.6);pointer-events:none;transition:opacity .18s ease,transform .22s ease;color:#1c1a17;font:inherit}
 .cmini [data-ic]{width:19px;height:19px}
 .cmini .cmh{font-size:12px;font-weight:600;letter-spacing:.02em}
-.cmini.c1{top:86px}.cmini.c2{top:142px}.cmini.c3{top:198px}
+.cmini.c1{top:86px}.cmini.c2{top:142px}.cmini.c3{top:198px}.cmini.c4{top:254px}
 .fabwrap.ctx.open .cmini{opacity:1;transform:none;pointer-events:auto}
 .fabwrap.ctx.open .c1{transition-delay:.04s}.fabwrap.ctx.open .c2{transition-delay:.1s}.fabwrap.ctx.open .c3{transition-delay:.16s}
 .cmini.on{background:#1c1a17;color:#f4f0e8;border-color:#1c1a17}

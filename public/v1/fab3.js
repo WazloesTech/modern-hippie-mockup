@@ -9,6 +9,7 @@ const html=`
   <button class="cmini c1" data-ctx="mh" aria-label="Modern Hippie" data-tip="Modern Hippie" data-tip-side="r"><span class="cmh">MH</span></button>
   <button class="cmini c2" data-ctx="follow" aria-label="Follow" data-tip="Follow" data-tip-side="r"><i data-ic="users"></i></button>
   <button class="cmini c3" data-ctx="personal" aria-label="Personal" data-tip="Personal" data-tip-side="r"><i data-ic="user"></i></button>
+  <button class="cmini c4" data-ctx="founders" id="cFounders" aria-label="Founders" data-tip="Founders" data-tip-side="r" hidden><i data-ic="crown"></i></button>
 </div>
 <div class="fabwrap left" id="lwrap">
   <button class="mini l s" id="lX" aria-label="Close" data-tip="Close" data-tip-side="r"><i data-ic="x"></i></button>
@@ -150,6 +151,7 @@ const SCREENS={
  Notifications:['Notifications',()=>`${EX}<div class="nlist">${NOTIFS.map((n,i)=>`<button type="button" class="nrow" data-n="${i}"><i class="asic" data-ic="${n.ic}"></i><span class="nbody"><b>${n.t}</b><small>${n.meta}</small></span>${chev}</button>`).join('')}</div>`],
  Settings:['Settings',settingsHTML]};
 const FOUNDERS=[['Gold','#d4a017',250,1000],['Green','#2f8f46',300,1500],['Indigo','#3f37c9',350,1600],['Red','#d1242f',400,1400],['Copper','#b87333',475,1200],['Yellow','#e6c200',550,1000],['Orange','#f0671e',650,850],['Pink','#ff4fa3',750,700],['Violet','#9b30ff',875,450],['Silver','#9aa3ad',1000,300]];
+const FOUNDER_SPACE_PERK='A private Founders space to share and gather with the other founders.';
 function financeHTML(state){
   const has=state==='member';
   const fmt=n=>n.toLocaleString('en-US');
@@ -158,7 +160,7 @@ function financeHTML(state){
     :`<button class="asbtn pri wide asaddcard"><i data-ic="credit-card"></i> Add credit card</button><p class="asnote">Add a card to start a membership.</p>`;
   const plan=(price,key,star,lab,desc,on)=>`<button class="mplan${on?' on':''}" data-v="${key}"><span class="mstar ${star}"><i data-ic="star"></i></span><div class="mbody"><b>$${price}<small>/mo</small></b><span class="mlab">${lab}</span><p>${desc}</p></div>${on?'<i class="mck" data-ic="check"></i>':''}</button>`;
   const plans=`<h5 class="ash5">Monthly</h5><div class="mplans">${plan(5,'growth','gold','Growth tools','Non-AI: progress tracking, offline saves, post stats, profile customization, more pods, supporter badge, small gift allowance.',false)}${plan(15,'ai','silver','Growth tools + AI','Everything in $5, plus AI guide, AI journal reflection and a bigger gift allowance. Founders get this for life with a fair-use AI cap.',has||state==='cancelled')}</div>`;
-  const ftiers=`<h5 class="ash5">Founder passes <small>least → most</small></h5><div class="ftiers">${FOUNDERS.map(([n,c,p,s])=>`<button class="ftier" data-v="${n}"><span class="fdot" style="background:${c}"></span><span class="fn">${n}</span><b>$${fmt(p)}</b><small>${fmt(s)} passes</small></button>`).join('')}</div><p class="asnote">Founders show a coloured circle only — no silver star. Same perks at every tier.</p>`;
+  const ftiers=`<h5 class="ash5" id="foundersTiers">Founder passes <small>least → most</small></h5><div class="ftiers">${FOUNDERS.map(([n,c,p,s])=>`<button class="ftier" data-v="${n}"><span class="fdot" style="background:${c}"></span><span style="flex:1;min-width:0"><span class="fn">${n}</span><span class="asnote" style="margin:2px 0 0;display:block">${FOUNDER_SPACE_PERK}</span></span><b>$${fmt(p)}</b><small>${fmt(s)} passes</small></button>`).join('')}</div><p class="asnote">Founders show a coloured circle only — no silver star. Same perks at every tier.</p>`;
   if(state==='cancelled')return EX+`<div class="askvs"><button class="askv ascard" type="button"><span>Card</span><b>Visa ending in **** 4242</b></button>${kv('Plan ends','November 4, 2026')}</div><p class="asnote">No more payments. You keep Growth tools + AI until then.</p><div class="asbtns"><button class="asbtn pri" id="asKeep">Keep plan</button></div>`+plans.replace(' on"',' "')+ftiers;
   return EX+pay+plans+ftiers+(has?`<button class="aslink" id="asCancel">Cancel plan</button>`:'');
 }
@@ -470,12 +472,14 @@ function openCreatePicker(){
   $('asBody').querySelectorAll('.ctyp').forEach(b=>b.onclick=e=>{e.stopPropagation();openCreateForm(b.dataset.k)});
 }
 
-// ---- top-left context switch (Modern Hippie / Follow / Personal)
-const CTX=[{id:'mh',label:'Modern Hippie',kind:'mh'},{id:'follow',label:'Follow',kind:'ic',ic:'users'},{id:'personal',label:'Personal',kind:'ic',ic:'user'}];
+// ---- top-left context switch (Modern Hippie / Follow / Personal / Founders)
+const CTX_BASE=[{id:'mh',label:'Modern Hippie',kind:'mh'},{id:'follow',label:'Follow',kind:'ic',ic:'users'},{id:'personal',label:'Personal',kind:'ic',ic:'user'}];
+const CTX=CTX_BASE.concat(window.MH_IS_FOUNDER?[{id:'founders',label:'Founders',kind:'ic',ic:'crown'}]:[]);
+const ctxOk=id=>CTX.some(c=>c.id===id);
 function readCtx(){
   const q=new URLSearchParams(location.search).get('ctx');
-  if(q&&['mh','follow','personal'].includes(q)){try{sessionStorage.setItem('mh.context',q)}catch(e){}return q}
-  try{const s=sessionStorage.getItem('mh.context');if(s&&['mh','follow','personal'].includes(s))return s}catch(e){}
+  if(q&&ctxOk(q)){try{sessionStorage.setItem('mh.context',q)}catch(e){}return q}
+  try{const s=sessionStorage.getItem('mh.context');if(s&&ctxOk(s))return s}catch(e){}
   return 'mh';
 }
 let curCtx=readCtx();
@@ -488,18 +492,24 @@ function paintCtxFab(){
   else{mark.hidden=true;mark.setAttribute('hidden','');ic.hidden=false;ic.removeAttribute('hidden');ic.dataset.ic=meta.ic;delete ic.dataset.done;paintIcons(cfab)}
   cfab.setAttribute('aria-label',meta.label);cfab.dataset.tip=meta.label;
   const alts=CTX.filter(c=>c.id!==curCtx);
+  const tops=[86,142,198,254];
+  const foundersBtn=$('cFounders');
+  if(foundersBtn)foundersBtn.hidden=!window.MH_IS_FOUNDER;
   cwrap.querySelectorAll('.cmini').forEach(b=>{
     const i=alts.findIndex(c=>c.id===b.dataset.ctx);
-    const show=i>=0;
+    const show=i>=0&&!(b.dataset.ctx==='founders'&&!window.MH_IS_FOUNDER);
     b.hidden=!show;b.classList.toggle('on',false);
-    b.classList.remove('c1','c2','c3');
-    if(show)b.classList.add(i===0?'c1':'c2');
+    b.classList.remove('c1','c2','c3','c4');
+    b.style.top='';
+    if(show){b.classList.add('c'+(i+1));b.style.top=tops[i]+'px'}
   });
+  const tt=document.getElementById('tt');
+  if(tt&&curCtx==='founders'){tt.textContent='Founders';document.title='Founders'}
 }
 function openCtx(){closeMenu();closeLeft();closeTop();closeVote();closeCreate(true);cwrap.classList.add('open');catcher.classList.add('on');paintCtxFab()}
 function closeCtx(){if(!cwrap)return;cwrap.classList.remove('open');syncCatcher()}
 function switchCtx(id){
-  if(!CTX.some(c=>c.id===id))return;
+  if(!ctxOk(id))return;
   try{sessionStorage.setItem('mh.context',id)}catch(e){}
   const u=new URL(location.href);
   if(id==='mh')u.searchParams.delete('ctx');else u.searchParams.set('ctx',id);
