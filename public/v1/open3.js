@@ -1,12 +1,12 @@
 // Deep-link states for the flow map (flows.html). Load last on a page.
 // ?open=<state> opens a menu, pop-up or screen after load. Normal use (no params) is unchanged.
-//   home7 / subtopic3: info, report, path, menu, create (&type=sub|feed|res, &info=1), tools, search (&q=),
+//   home7 / subtopic3: info, report, path, menu, create (&type=sub|feed|res|event, &info=1), tools, search (&q=),
 //     sort (&dd=1), view, vote, context, top, profile, notifications, settings, finance (&bill=none|member),
 //     card (&bill=none|member)
 //     editprofile, cancel (Finance > Cancel plan), settings (&item=notifications|language|theme|privacy|account),
 //     sedit / sdel (edit / delete this subtopic from its info card)
 //   feed-detail: reply, more, edit, delete, cmenu / cedit / cdel / cgone (&cid=), &hl=<cid> highlights a comment
-//   people-detail: follow · resource-detail: open, more, edit, delete · pod-detail: join
+//   people-detail: follow · resource-detail: open, more, edit, delete · pod-detail: join · event-detail: going (&open=going)
 // &flowmap=1 = shown inside the flow map: no focus stealing, no animations.
 (function(){
 const P=new URLSearchParams(location.search);

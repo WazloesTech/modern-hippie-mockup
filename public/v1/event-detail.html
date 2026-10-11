@@ -1,0 +1,74 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="mock3.css"></head><body>
+<main class="dpage">
+  <div class="dtop"><a class="icbtn" id="back" href="home7.html#people" aria-label="Back"><i data-ic="arrow-left"></i></a><h1 id="title">Event</h1></div>
+  <p class="dmeta" id="when"></p>
+  <p class="dmeta" id="loc"></p>
+  <div class="chips" id="topic"></div>
+  <p class="dbody" id="desc"></p>
+  <p class="dmeta" id="hostline"></p>
+  <div class="dbtns" id="rsvp">
+    <button type="button" class="asbtn pri" id="going">Going</button>
+    <button type="button" class="asbtn" id="notgoing">Not going</button>
+  </div>
+  <p class="sect" id="goingLab">Who's going</p>
+  <div id="goingList"></div>
+  <p class="sect">Comments</p>
+  <div class="cthread" id="thread"></div>
+</main>
+<div class="dcomposer">
+  <span class="creplyhint" id="hint" hidden></span>
+  <div class="dcomposerrow">
+    <input id="reply" placeholder="Write a comment" aria-label="Comment">
+    <button type="button" id="send">Comment</button>
+  </div>
+</div>
+<script src="icons3.js"></script><script src="comments3.js"></script><script>
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const T=P.get('t')||'Saturday morning walk';
+const from=P.get('from')||'home7.html#people';
+const when=P.get('when')||'Sat 18 Oct · 8:00 a.m.';
+const place=P.get('place')||'Trout Lake Park, Vancouver';
+const online=P.get('online')==='1';
+const host=P.get('host')||'@sage';
+const topic=P.get('topic')||'Body';
+let going=Math.max(0,parseInt(P.get('going')||'24',10));
+const DESC={
+  'Saturday morning walk':'A relaxed loop around the lake. All paces welcome. Bring water and dress for the weather.',
+  'Guided breathing circle':'A 45-minute session on Zoom. Cameras optional. We end with a short gratitude share.',
+  'Family potluck picnic':'Bring a dish to share. Kids can run on the grass while adults chat. Rain date is the following Sunday.',
+  'Small business check-in':'An informal hour to swap wins and questions. No pitches — just peer support.',
+  'Neighbourhood garden work bee':'Help weed and mulch the community beds. Tools provided; gloves if you have them.',
+  'Soulful book chat':'We discuss two chapters from this month’s pick. Spoilers welcome after the first ten minutes.'};
+$('back').href=from;$('title').textContent=T;document.title=T;
+$('when').textContent=when;
+$('loc').innerHTML=online?'<a href="#" id="zoom">Online · Join link</a>':place;
+$('topic').innerHTML=`<span>${topic.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}</span>`;
+$('desc').textContent=DESC[T]||'Members meet to learn, share and connect. Everyone is welcome.';
+$('hostline').innerHTML='Hosted by <b>'+host+'</b>';
+const FOLKS=['@river','@sage','@juniper','@ash','@wren','@cedar','@moss','@fern'];
+let rsvp=null;
+function syncGoing(){
+  $('goingLab').textContent=`Who's going (${going})`;
+  const n=Math.min(going,FOLKS.length);
+  const list=FOLKS.slice(0,n).map(h=>`<div class="row"><div class="ph phav"><i data-ic="user"></i></div><div class="rinfo"><b>${h}</b></div></div>`);
+  if(rsvp==='going')list.push(`<div class="row"><div class="ph phav"><i data-ic="user"></i></div><div class="rinfo"><b>@you</b><span class="meta">Going</span></div></div>`);
+  $('goingList').innerHTML=list.join('');
+  paintIcons($('goingList'));
+  $('going').classList.toggle('on',rsvp==='going');
+  $('notgoing').classList.toggle('on',rsvp==='not');
+}
+syncGoing();
+$('going').onclick=()=>{const was=rsvp;rsvp='going';if(was!=='going')going++;syncGoing()};
+$('notgoing').onclick=()=>{const was=rsvp;rsvp='not';if(was==='going'&&going>0)going--;syncGoing()};
+if(online){$('zoom').onclick=e=>{e.preventDefault();$('zoom').textContent='Link copied'};}
+const here=location.pathname.split('/').pop()+location.search;
+function draw(){MHComments.render($('thread'),{postT:T,fromUrl:here,hl:P.get('hl')})}
+paintIcons();
+draw();
+const composer=document.querySelector('.dcomposer');
+composer._rerender=draw;
+MHComments.wire($('thread'),composer);
+if(P.get('open')==='going')$('going').click();
+</script><script src="open3.js"></script></body></html>

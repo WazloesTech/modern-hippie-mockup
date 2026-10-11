@@ -285,7 +285,8 @@ twrap.querySelectorAll('.tmini').forEach(b=>b.onclick=()=>openScreen(b.dataset.l
 const CREATE_META={
   sub:{title:'New subtopic',fields:'name'},
   feed:{title:'Write a post',fields:'post'},
-  res:{title:'Add a resource',fields:'res'}
+  res:{title:'Add a resource',fields:'res'},
+  event:{title:'New event',fields:'event'}
 };
 function closeCreate(silent){
   const pop=$('cInfoPop');if(pop)pop.remove();
@@ -333,6 +334,12 @@ function createFormHTML(k){
     <label class="cfield"><span>Type</span><select id="cPostType"><option value="written">Written</option><option value="photo">Photo</option><option value="video">Video</option></select></label>
     <label class="cfield"><span>Post</span><textarea id="cBody" rows="5" placeholder="Share an update"></textarea></label>
     <button type="button" class="asbtn pri wide" id="cSubmit">Post</button></div>`;
+  if(k==='event')return `${EX}<div class="cform" id="cForm" data-k="event">${secPick}
+    <label class="cfield"><span>Title</span><input id="cName" placeholder="e.g. Saturday morning walk" maxlength="120"></label>
+    <label class="cfield"><span>Date and time</span><input id="cWhen" placeholder="e.g. Sat 25 Oct · 10:00 a.m." maxlength="80"></label>
+    <label class="cfield"><span>Place</span><input id="cPlace" placeholder="Address or Online" maxlength="120"></label>
+    <label class="cfield"><span>Description <small>(optional)</small></span><textarea id="cBody" rows="3" placeholder="What to expect"></textarea></label>
+    <button type="button" class="asbtn pri wide" id="cSubmit">Add event</button></div>`;
   return `${EX}<div class="cform" id="cForm" data-k="res">${secPick}
     <label class="cfield"><span>Title</span><input id="cName" placeholder="Resource title" maxlength="120"></label>
     <label class="cfield"><span>Type</span><select id="cType"><option value="link">Link</option><option value="file">File</option></select></label>
@@ -431,6 +438,15 @@ function wireCreateForm(k){
       const label=ptype==='video'?'Example video post':(ptype==='photo'?'Example photo post':'Example written post');
       window.addPlaceholderItem&&addPlaceholderItem('feed',{t:label+': '+body.slice(0,60)+(body.length>60?'…':''),text:body,meta:'Just now · 0 likes · 0 comments',type:ptype,video:ptype==='video'});
       closeCreate();window.toast&&toast('Post added');return;
+    }
+    if(k==='event'){
+      const t=$('cName').value.trim()||'New event';
+      const when=$('cWhen').value.trim()||'Soon';
+      const place=$('cPlace').value.trim()||'Online';
+      const online=/^online$/i.test(place);
+      const topic=topicName();
+      window.addPlaceholderItem&&addPlaceholderItem('people',{t,when,place,online,text:$('cBody').value.trim()||undefined,kind:'event',chips:[topic],meta:`${when} · ${online?'Online':place} · 1 going`});
+      closeCreate();window.toast&&toast('Event added');return;
     }
     const t=$('cName').value.trim()||'New resource';
     const kind=$('cType').value;
